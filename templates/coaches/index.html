@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block title %}Coaching Staff - ZONE SPORT CENTER{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+  <div>
+    <h2 class="text-white fw-bold mb-1">
+      <i class="fas fa-user-shield text-orange me-2"></i> COACHING STAFF
+    </h2>
+    <p class="text-white fs-6 mb-0">Professional basketball coaching and athletic training team at Zone Sport Center</p>
+  </div>
+  {% if current_user.role == 'admin' %}
+  <div>
+    <a href="{{ url_for('coach_new') }}" class="btn btn-zone-primary">
+      <i class="fas fa-plus-circle"></i> ADD NEW COACH
+    </a>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Search & Filter Card -->
+<div class="zone-card mb-4 p-3 border-2">
+  <form method="GET" action="{{ url_for('coach_list') }}" class="row g-2 align-items-center">
+    <div class="col-md-9 col-lg-10">
+      <div class="input-group input-group-lg">
+        <span class="input-group-text bg-dark border-secondary text-gold">
+          <i class="fas fa-search fa-lg"></i>
+        </span>
+        <input type="text" name="q" class="form-control" placeholder="Search by Coach ID, Name, Phone, or Email..." value="{{ query or '' }}">
+      </div>
+    </div>
+    <div class="col-md-3 col-lg-2 d-flex gap-2">
+      <button type="submit" class="btn btn-zone-primary w-100">
+        <i class="fas fa-filter"></i> FILTER
+      </button>
+      {% if query %}
+      <a href="{{ url_for('coach_list') }}" class="btn btn-zone-secondary" title="Clear filter">
+        <i class="fas fa-times"></i>
+      </a>
+      {% endif %}
+    </div>
+  </form>
+</div>
+
+<!-- Coaches Grid -->
+<div class="row g-4">
+  {% for c in coaches %}
+  <div class="col-lg-4 col-md-6">
+    <div class="zone-card h-100 d-flex flex-column border-2">
+      <div class="zone-card-body p-4 flex-grow-1">
+        <div class="d-flex align-items-start justify-content-between mb-3">
+          <div class="d-flex align-items-center gap-3">
+            <div class="stat-icon text-orange" style="width: 56px; height: 56px; font-size: 1.8rem;">
+              <i class="fas fa-user-shield"></i>
+            </div>
+            <div>
+              <span class="badge-id">{{ c.id }}</span>
+              <h5 class="text-white fw-bold mb-0 mt-1 fs-5">{{ c.name }}</h5>
+            </div>
+          </div>
+          <span class="badge bg-success text-white fw-bold px-2 py-1 fs-7">{{ c.status }}</span>
+        </div>
+
+        <div class="mb-3">
+          <div class="d-flex justify-content-between py-2 border-bottom border-secondary align-items-center">
+            <span class="text-white"><i class="fas fa-phone-alt text-gold me-2"></i>Phone:</span>
+            <a href="tel:{{ c.phone }}" class="text-gold fw-bold text-decoration-none fs-6">{{ c.phone }}</a>
+          </div>
+          <div class="d-flex justify-content-between py-2 border-bottom border-secondary align-items-center">
+            <span class="text-white"><i class="fas fa-envelope text-gold me-2"></i>Email:</span>
+            <span class="text-white fw-bold text-truncate" style="max-width: 180px;">{{ c.email }}</span>
+          </div>
+          <div class="d-flex justify-content-between py-2 border-bottom border-secondary align-items-center">
+            <span class="text-white"><i class="fas fa-history text-gold me-2"></i>Experience:</span>
+            <span class="text-gold fw-bold">{{ c.experience or '---' }}</span>
+          </div>
+          <div class="d-flex justify-content-between py-2 border-bottom border-secondary align-items-center">
+            <span class="text-white"><i class="fas fa-basketball-ball text-gold me-2"></i>Assigned Classes:</span>
+            <span class="badge bg-warning text-dark fw-bold fs-6">{{ c.classes_count }} Classes</span>
+          </div>
+        </div>
+
+        {% if c.specialty %}
+        <div class="p-3 bg-dark rounded border border-warning mb-3">
+          <span class="text-gold fw-bold d-block mb-1"><i class="fas fa-star me-1"></i> Coaching Specialty:</span>
+          <span class="text-white small fw-bold">{{ c.specialty }}</span>
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="zone-card-header bg-dark border-top py-2 px-3 d-flex justify-content-between align-items-center">
+        <a href="{{ url_for('coach_detail', coach_id=c.id) }}" class="btn btn-sm btn-zone-outline">
+          <i class="fas fa-list me-1"></i> View Assigned Classes
+        </a>
+        {% if current_user.role == 'admin' %}
+        <div class="btn-group btn-group-sm">
+          <a href="{{ url_for('coach_edit', coach_id=c.id) }}" class="btn btn-zone-secondary" title="Edit Coach">
+            <i class="fas fa-edit text-warning"></i>
+          </a>
+          <button type="button" class="btn btn-zone-danger" onclick="confirmDeleteCoach('{{ c.id }}', '{{ c.name }}')" title="Delete Coach">
+            <i class="fas fa-trash-alt"></i>
+          </button>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <div class="col-12">
+    <div class="zone-card p-5 text-center text-white">
+      <i class="fas fa-search fa-3x mb-3 text-warning d-block"></i>
+      <h5>No coaches matched your search criteria!</h5>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Modal Delete Coach Confirmation -->
+<div class="modal fade" id="deleteCoachModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header border-danger">
+        <h5 class="modal-title text-danger"><i class="fas fa-exclamation-triangle me-2"></i> Confirm Coach Deletion</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-white">
+        Are you sure you want to delete coach <strong id="deleteCoachName" class="text-gold"></strong> (<span id="deleteCoachId"></span>)?
+        <div class="alert alert-warning mt-3 mb-0 small">
+          <i class="fas fa-info-circle me-1"></i> <strong>Note:</strong> Classes assigned to this coach will be changed to "Unassigned".
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-zone-secondary" data-bs-dismiss="modal">Cancel</button>
+        <form id="deleteCoachForm" method="POST" action="">
+          <button type="submit" class="btn btn-danger fw-bold">Confirm Delete</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function confirmDeleteCoach(id, name) {
+    document.getElementById('deleteCoachName').innerText = name;
+    document.getElementById('deleteCoachId').innerText = id;
+    document.getElementById('deleteCoachForm').action = "/coaches/" + id + "/delete";
+    const modal = new bootstrap.Modal(document.getElementById('deleteCoachModal'));
+    modal.show();
+  }
+</script>
+{% endblock %}

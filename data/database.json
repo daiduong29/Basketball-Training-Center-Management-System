@@ -1,0 +1,546 @@
+{
+  "users": [
+    {
+      "id": "U001",
+      "username": "admin",
+      "password": "admin123",
+      "role": "admin",
+      "full_name": "Quản Trị Viên Zone",
+      "email": "admin@zonesport.vn",
+      "phone": "0909123456",
+      "coach_id": null,
+      "avatar": "/static/images/default-avatar.png",
+      "bio": "Quản trị viên toàn hệ thống Zone Sport Center"
+    },
+    {
+      "id": "U002",
+      "username": "coach_nam",
+      "password": "coach123",
+      "role": "coach",
+      "full_name": "Nguyễn Thành Nam",
+      "email": "nam.nguyen@zonesport.vn",
+      "phone": "0912345678",
+      "coach_id": "HLV001",
+      "avatar": "/static/images/default-avatar.png",
+      "bio": "Cựu VĐV bóng rổ quốc gia, 8 năm kinh nghiệm huấn luyện đào tạo trẻ"
+    },
+    {
+      "id": "U003",
+      "username": "coach_hoang",
+      "password": "coach123",
+      "role": "coach",
+      "full_name": "Trần Minh Hoàng",
+      "email": "hoang.tran@zonesport.vn",
+      "phone": "0987654321",
+      "coach_id": "HLV002",
+      "avatar": "/static/images/default-avatar.png",
+      "bio": "Chuyên gia đào tạo kỹ thuật ném bóng và tư duy chiến thuật thi đấu"
+    },
+    {
+      "id": "U004",
+      "username": "coach_duy",
+      "password": "coach123",
+      "role": "coach",
+      "full_name": "Lê Quốc Duy",
+      "email": "duy.le@zonesport.vn",
+      "phone": "0933889900",
+      "coach_id": "HLV003",
+      "avatar": "/static/images/default-avatar.png",
+      "bio": "Huấn luyện viên thể lực và kỹ năng phòng ngự nâng cao"
+    }
+  ],
+  "coaches": [
+    {
+      "id": "HLV001",
+      "name": "Nguyễn Thành Nam",
+      "phone": "0912345678",
+      "email": "nam.nguyen@zonesport.vn",
+      "experience": "8 năm",
+      "specialty": "Kỹ thuật cơ bản & Đào tạo trẻ U12-U15",
+      "bio": "Cựu tuyển thủ trẻ, tốt nghiệp ĐH TDTT TP.HCM chuyên ngành Bóng rổ.",
+      "status": "Đang hoạt động"
+    },
+    {
+      "id": "HLV002",
+      "name": "Trần Minh Hoàng",
+      "phone": "0987654321",
+      "email": "hoang.tran@zonesport.vn",
+      "experience": "6 năm",
+      "specialty": "Kỹ thuật ném 3 điểm & Thể lực thi đấu",
+      "bio": "HLV đạt chứng chỉ FIBA Level 1, kinh nghiệm dẫn dắt nhiều đội học sinh vô địch giải trẻ.",
+      "status": "Đang hoạt động"
+    },
+    {
+      "id": "HLV003",
+      "name": "Lê Quốc Duy",
+      "phone": "0933889900",
+      "email": "duy.le@zonesport.vn",
+      "experience": "5 năm",
+      "specialty": "Chiến thuật phối hợp & Phòng ngự phản công",
+      "bio": "Trợ lý HLV tại giải bóng rổ bán chuyên VBA Development League.",
+      "status": "Đang hoạt động"
+    }
+  ],
+  "students": [
+    {
+      "id": "HV001",
+      "name": "Nguyễn Văn An",
+      "dob": "2012-05-14",
+      "gender": "Nam",
+      "phone": "0901112233",
+      "address": "Số 12 Võ Văn Ngân, TP. Thủ Đức, TP.HCM",
+      "created_date": "2026-09-01",
+      "status": "Đang học",
+      "note": "Tiềm năng ném bóng tốt, đam mê vị trí Hậu vệ"
+    },
+    {
+      "id": "HV002",
+      "name": "Lê Hoàng Bảo",
+      "dob": "2011-08-20",
+      "gender": "Nam",
+      "phone": "0902223344",
+      "address": "45 Lê Văn Việt, Tăng Nhơn Phú B, TP. Thủ Đức",
+      "created_date": "2026-09-05",
+      "status": "Đang học",
+      "note": "Chiều cao tốt 1m75, phù hợp vị trí Tiền phong"
+    },
+    {
+      "id": "HV003",
+      "name": "Phạm Mai Chi",
+      "dob": "2013-11-03",
+      "gender": "Nữ",
+      "phone": "0903334455",
+      "address": "120 Đặng Văn Bi, Bình Thọ, TP. Thủ Đức",
+      "created_date": "2026-09-10",
+      "status": "Đang học",
+      "note": "Kỹ năng dẫn bóng khéo léo, tập luyện chăm chỉ"
+    },
+    {
+      "id": "HV004",
+      "name": "Vũ Đăng Khoa",
+      "dob": "2010-02-18",
+      "gender": "Nam",
+      "phone": "0904445566",
+      "address": "88 Hoàng Diệu 2, Linh Chiểu, TP. Thủ Đức",
+      "created_date": "2026-09-12",
+      "status": "Đang học",
+      "note": "Đang chuẩn bị thi đấu giải học sinh Quận"
+    },
+    {
+      "id": "HV005",
+      "name": "Trịnh Gia Huy",
+      "dob": "2014-04-25",
+      "gender": "Nam",
+      "phone": "0905556677",
+      "address": "25 Tô Ngọc Vân, Tam Phú, TP. Thủ Đức",
+      "created_date": "2026-09-15",
+      "status": "Đang học",
+      "note": "Mới bắt đầu làm quen bóng rổ, rất năng nổ"
+    },
+    {
+      "id": "HV006",
+      "name": "Đỗ Ngọc Ánh",
+      "dob": "2012-09-12",
+      "gender": "Nữ",
+      "phone": "0906667788",
+      "address": "77 Kha Vạn Cân, Hiệp Bình Chánh, TP. Thủ Đức",
+      "created_date": "2026-09-18",
+      "status": "Đang học",
+      "note": "Tập ném cự ly trung bình và thể lực"
+    },
+    {
+      "id": "HV007",
+      "name": "Huỳnh Tấn Phát",
+      "dob": "2009-12-30",
+      "gender": "Nam",
+      "phone": "0907778899",
+      "address": "15 Quang Trung, Hiệp Phú, TP. Thủ Đức",
+      "created_date": "2026-09-22",
+      "status": "Đang học",
+      "note": "Nhóm Nâng cao, thể lực và tốc độ xuất sắc"
+    },
+    {
+      "id": "HV008",
+      "name": "Ngô Quốc Thịnh",
+      "dob": "2011-06-19",
+      "gender": "Nam",
+      "phone": "0908889911",
+      "address": "33 Trần Hưng Đạo, P. Dĩ An, Bình Dương",
+      "created_date": "2026-10-01",
+      "status": "Đang học",
+      "note": "Học lớp Trung cấp buổi tối"
+    },
+    {
+      "id": "HV009",
+      "name": "Bùi Thảo My",
+      "dob": "2013-03-08",
+      "gender": "Nữ",
+      "phone": "0909990022",
+      "address": "62 Tây Hòa, Phước Long A, TP. Thủ Đức",
+      "created_date": "2026-10-05",
+      "status": "Đang học",
+      "note": "Thích bóng rổ nghệ thuật và ném phạt"
+    },
+    {
+      "id": "HV010",
+      "name": "Lý Gia Bảo",
+      "dob": "2010-07-27",
+      "gender": "Nam",
+      "phone": "0911223344",
+      "address": "104 Nguyễn Duy Trinh, Bình Trưng Tây, TP. Thủ Đức",
+      "created_date": "2026-10-10",
+      "status": "Đang học",
+      "note": "Học sinh lớp Nâng cao thi đấu"
+    }
+  ],
+  "classes": [
+    {
+      "id": "LH001",
+      "name": "Bóng Rổ Cơ Bản U12 (Zone Rookies A)",
+      "level": "Beginner",
+      "coach_id": "HLV001",
+      "max_students": 15,
+      "tuition_fee": 1500000,
+      "status": "Đang học",
+      "schedule": "Thứ 2 - Thứ 4 (17:30 - 19:00)",
+      "location": "Sân Zone Arena 1",
+      "description": "Lớp học dành cho học viên mới bắt đầu làm quen bóng rổ, rèn luyện kỹ năng nhồi bóng, chuyền bóng và ném rổ cơ bản."
+    },
+    {
+      "id": "LH002",
+      "name": "Bóng Rổ Cơ Bản U15 (Zone Rookies B)",
+      "level": "Beginner",
+      "coach_id": "HLV001",
+      "max_students": 15,
+      "tuition_fee": 1600000,
+      "status": "Đang học",
+      "schedule": "Thứ 3 - Thứ 5 (18:00 - 19:30)",
+      "location": "Sân Zone Arena 2",
+      "description": "Phát triển nền tảng kỹ năng cá nhân, bộ chân (footwork) và luật thi đấu cơ bản cho lứa tuổi U15."
+    },
+    {
+      "id": "LH003",
+      "name": "Bóng Rổ Trung Cấp (Zone All-Stars)",
+      "level": "Intermediate",
+      "coach_id": "HLV002",
+      "max_students": 12,
+      "tuition_fee": 1800000,
+      "status": "Đang học",
+      "schedule": "Thứ 2 - Thứ 6 (19:30 - 21:00)",
+      "location": "Sân Zone Arena 1",
+      "description": "Nâng cao cảm giác bóng, kỹ năng ném cự ly trung bình và 3 điểm, rèn luyện kỹ năng phòng thủ 1-1."
+    },
+    {
+      "id": "LH004",
+      "name": "Bóng Rổ Nâng Cao & Chiến Thuật (Zone Elite)",
+      "level": "Advanced",
+      "coach_id": "HLV003",
+      "max_students": 10,
+      "tuition_fee": 2200000,
+      "status": "Đang học",
+      "schedule": "Thứ 4 - Thứ 7 (19:30 - 21:00)",
+      "location": "Sân Zone Arena VIP",
+      "description": "Đào tạo chuyên sâu chiến thuật đội hình (Pick & Roll, Fast Break, Zone Defense), cọ xát thi đấu thực tế."
+    },
+    {
+      "id": "LH005",
+      "name": "Lớp Kỹ Năng Cuối Tuần (Weekend Skills)",
+      "level": "Beginner",
+      "coach_id": "HLV002",
+      "max_students": 16,
+      "tuition_fee": 1400000,
+      "status": "Đang mở đăng ký",
+      "schedule": "Thứ 7 - Chủ Nhật (08:00 - 09:30)",
+      "location": "Sân Zone Arena 2",
+      "description": "Lớp học cuối tuần bổ ích giúp các bạn trẻ xả stress, tăng cường chiều cao và kết nối bạn bè."
+    }
+  ],
+  "enrollments": [
+    {
+      "id": "DK001",
+      "student_id": "HV001",
+      "class_id": "LH001",
+      "enroll_date": "2026-09-02",
+      "status": "Đang học"
+    },
+    {
+      "id": "DK002",
+      "student_id": "HV002",
+      "class_id": "LH002",
+      "enroll_date": "2026-09-06",
+      "status": "Đang học"
+    },
+    {
+      "id": "DK003",
+      "student_id": "HV003",
+      "class_id": "LH001",
+      "enroll_date": "2026-09-11",
+      "status": "Đang học"
+    },
+    {
+      "id": "DK004",
+      "student_id": "HV004",
+      "class_id": "LH003",
+      "enroll_date": "2026-09-14",
+      "status": "Đang học"
+    },
+    {
+      "id": "DK005",
+      "student_id": "HV005",
+      "class_id": "LH001",
+      "enroll_date": "2026-09-16",
+      "status": "Đang học"
+    },
+    {
+      "id": "DK006",
+      "student_id": "HV006",
+      "class_id": "LH002",
+      "enroll_date": "2026-09-20",
+      "status": "Đang học"
+    },
+    {
+      "id": "DK007",
+      "student_id": "HV007",
+      "class_id": "LH004",
+      "enroll_date": "2026-09-23",
+      "status": "Đang học"
+    },
+    {
+      "id": "DK008",
+      "student_id": "HV008",
+      "class_id": "LH003",
+      "enroll_date": "2026-10-02",
+      "status": "Đang học"
+    },
+    {
+      "id": "DK009",
+      "student_id": "HV009",
+      "class_id": "LH005",
+      "enroll_date": "2026-10-06",
+      "status": "Đang học"
+    },
+    {
+      "id": "DK010",
+      "student_id": "HV010",
+      "class_id": "LH004",
+      "enroll_date": "2026-10-11",
+      "status": "Đang học"
+    },
+    {
+      "id": "DK011",
+      "student_id": "HV001",
+      "class_id": "LH005",
+      "enroll_date": "2026-10-15",
+      "status": "Đang học"
+    }
+  ],
+  "payments": [
+    {
+      "id": "HP001",
+      "student_id": "HV001",
+      "class_id": "LH001",
+      "amount": 1500000,
+      "paid_amount": 1500000,
+      "status": "Đã thanh toán",
+      "payment_date": "2026-09-02",
+      "payment_method": "Chuyển khoản QR",
+      "note": "Đã đóng đủ học phí tháng 9-10"
+    },
+    {
+      "id": "HP002",
+      "student_id": "HV002",
+      "class_id": "LH002",
+      "amount": 1600000,
+      "paid_amount": 1600000,
+      "status": "Đã thanh toán",
+      "payment_date": "2026-09-06",
+      "payment_method": "Tiền mặt",
+      "note": "Thanh toán tại quầy lễ tân"
+    },
+    {
+      "id": "HP003",
+      "student_id": "HV003",
+      "class_id": "LH001",
+      "amount": 1500000,
+      "paid_amount": 1500000,
+      "status": "Đã thanh toán",
+      "payment_date": "2026-09-11",
+      "payment_method": "Chuyển khoản QR",
+      "note": "Phụ huynh chuyển khoản ngân hàng"
+    },
+    {
+      "id": "HP004",
+      "student_id": "HV004",
+      "class_id": "LH003",
+      "amount": 1800000,
+      "paid_amount": 1800000,
+      "status": "Đã thanh toán",
+      "payment_date": "2026-09-14",
+      "payment_method": "Thẻ tín dụng",
+      "note": "Cà thẻ POS"
+    },
+    {
+      "id": "HP005",
+      "student_id": "HV005",
+      "class_id": "LH001",
+      "amount": 1500000,
+      "paid_amount": 0,
+      "status": "Chưa thanh toán",
+      "payment_date": null,
+      "payment_method": null,
+      "note": "Hẹn nộp vào buổi học kế tiếp"
+    },
+    {
+      "id": "HP006",
+      "student_id": "HV006",
+      "class_id": "LH002",
+      "amount": 1600000,
+      "paid_amount": 1600000,
+      "status": "Đã thanh toán",
+      "payment_date": "2026-09-20",
+      "payment_method": "Chuyển khoản QR",
+      "note": "Đã hoàn thành học phí"
+    },
+    {
+      "id": "HP007",
+      "student_id": "HV007",
+      "class_id": "LH004",
+      "amount": 2200000,
+      "paid_amount": 2200000,
+      "status": "Đã thanh toán",
+      "payment_date": "2026-09-23",
+      "payment_method": "Chuyển khoản QR",
+      "note": "Học phí khóa Elite"
+    },
+    {
+      "id": "HP008",
+      "student_id": "HV008",
+      "class_id": "LH003",
+      "amount": 1800000,
+      "paid_amount": 1000000,
+      "status": "Chưa thanh toán",
+      "payment_date": "2026-10-02",
+      "payment_method": "Tiền mặt",
+      "note": "Đặt cọc 1,000,000đ, còn nợ 800,000đ"
+    },
+    {
+      "id": "HP009",
+      "student_id": "HV009",
+      "class_id": "LH005",
+      "amount": 1400000,
+      "paid_amount": 1400000,
+      "status": "Đã thanh toán",
+      "payment_date": "2026-10-06",
+      "payment_method": "Chuyển khoản QR",
+      "note": "Thanh toán khóa cuối tuần"
+    },
+    {
+      "id": "HP010",
+      "student_id": "HV010",
+      "class_id": "LH004",
+      "amount": 2200000,
+      "paid_amount": 0,
+      "status": "Chưa thanh toán",
+      "payment_date": null,
+      "payment_method": null,
+      "note": "Chờ xác nhận từ phụ huynh"
+    },
+    {
+      "id": "HP011",
+      "student_id": "HV001",
+      "class_id": "LH005",
+      "amount": 1400000,
+      "paid_amount": 1400000,
+      "status": "Đã thanh toán",
+      "payment_date": "2026-10-15",
+      "payment_method": "Chuyển khoản QR",
+      "note": "Học viên đăng ký thêm lớp thứ 2"
+    }
+  ],
+  "attendances": [
+    {
+      "id": "AT001",
+      "class_id": "LH001",
+      "student_id": "HV001",
+      "date": "2026-10-20",
+      "status": "Có mặt"
+    },
+    {
+      "id": "AT002",
+      "class_id": "LH001",
+      "student_id": "HV003",
+      "date": "2026-10-20",
+      "status": "Có mặt"
+    },
+    {
+      "id": "AT003",
+      "class_id": "LH001",
+      "student_id": "HV005",
+      "date": "2026-10-20",
+      "status": "Vắng có phép"
+    },
+    {
+      "id": "AT004",
+      "class_id": "LH001",
+      "student_id": "HV001",
+      "date": "2026-10-22",
+      "status": "Có mặt"
+    },
+    {
+      "id": "AT005",
+      "class_id": "LH001",
+      "student_id": "HV003",
+      "date": "2026-10-22",
+      "status": "Có mặt"
+    },
+    {
+      "id": "AT006",
+      "class_id": "LH001",
+      "student_id": "HV005",
+      "date": "2026-10-22",
+      "status": "Có mặt"
+    },
+    {
+      "id": "AT007",
+      "class_id": "LH002",
+      "student_id": "HV002",
+      "date": "2026-10-21",
+      "status": "Có mặt"
+    },
+    {
+      "id": "AT008",
+      "class_id": "LH002",
+      "student_id": "HV006",
+      "date": "2026-10-21",
+      "status": "Có mặt"
+    },
+    {
+      "id": "AT009",
+      "class_id": "LH003",
+      "student_id": "HV004",
+      "date": "2026-10-21",
+      "status": "Có mặt"
+    },
+    {
+      "id": "AT010",
+      "class_id": "LH003",
+      "student_id": "HV008",
+      "date": "2026-10-21",
+      "status": "Có mặt"
+    },
+    {
+      "id": "AT011",
+      "class_id": "LH004",
+      "student_id": "HV007",
+      "date": "2026-10-22",
+      "status": "Có mặt"
+    },
+    {
+      "id": "AT012",
+      "class_id": "LH004",
+      "student_id": "HV010",
+      "date": "2026-10-22",
+      "status": "Có mặt"
+    }
+  ]
+}

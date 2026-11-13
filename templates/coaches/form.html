@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Edit Coach' if is_edit else 'Add New Coach' }} - ZONE SPORT CENTER{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="zone-card border-2">
+      <div class="zone-card-header">
+        <h4 class="mb-0 text-white fw-bold">
+          <i class="fas {% if is_edit %}fa-edit text-warning{% else %}fa-user-tie text-gold{% endif %} me-2"></i>
+          {{ 'EDIT COACH PROFILE' if is_edit else 'ADD NEW COACH' }}
+        </h4>
+        {% if is_edit %}
+          <span class="badge bg-warning text-dark fs-6 fw-bold">{{ coach.id }}</span>
+        {% endif %}
+      </div>
+      <div class="zone-card-body">
+        <form method="POST" action="">
+          <div class="row g-3 mb-3">
+            {% if is_edit %}
+            <div class="col-md-4">
+              <label class="form-label text-white">Coach ID</label>
+              <input type="text" class="form-control text-warning fw-bold bg-dark border-secondary" value="{{ coach.id }}" readonly disabled>
+            </div>
+            <div class="col-md-8">
+            {% else %}
+            <div class="col-12">
+            {% endif %}
+              <label class="form-label text-white" for="name">Coach Full Name <span class="text-danger">*</span></label>
+              <input type="text" class="form-control form-control-lg bg-dark text-white border-secondary" id="name" name="name" placeholder="e.g. John Miller" value="{{ coach.name if is_edit else '' }}" required>
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label text-white" for="phone">Phone Number <span class="text-danger">*</span></label>
+              <input type="tel" class="form-control form-control-lg bg-dark text-white border-secondary" id="phone" name="phone" placeholder="e.g. 0912 345 678" value="{{ coach.phone if is_edit else '' }}" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label text-white" for="email">Email Address <span class="text-danger">*</span></label>
+              <input type="email" class="form-control form-control-lg bg-dark text-white border-secondary" id="email" name="email" placeholder="coach@zonesport.vn" value="{{ coach.email if is_edit else '' }}" required>
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label text-white" for="experience">Coaching Experience</label>
+              <input type="text" class="form-control form-control-lg bg-dark text-white border-secondary" id="experience" name="experience" placeholder="e.g. 8 years, former pro player" value="{{ coach.experience if is_edit else '' }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label text-white" for="specialty">Core Specialty</label>
+              <input type="text" class="form-control form-control-lg bg-dark text-white border-secondary" id="specialty" name="specialty" placeholder="e.g. 3-Point Shooting, Defense Tactics" value="{{ coach.specialty if is_edit else '' }}">
+            </div>
+          </div>
+
+          {% if is_edit %}
+          <div class="mb-3">
+            <label class="form-label text-white" for="status">Employment Status</label>
+            <select class="form-select form-select-lg bg-dark text-white border-secondary" id="status" name="status">
+              <option value="Active" {% if coach.status in ['Active', 'Đang hoạt động'] %}selected{% endif %}>Active</option>
+              <option value="On Leave" {% if coach.status in ['On Leave', 'Tạm nghỉ'] %}selected{% endif %}>On Leave</option>
+              <option value="Resigned" {% if coach.status in ['Resigned', 'Đã nghỉ việc'] %}selected{% endif %}>Resigned</option>
+            </select>
+          </div>
+          {% endif %}
+
+          <div class="mb-4">
+            <label class="form-label text-white" for="bio">Biography & Career Highlights</label>
+            <textarea class="form-control bg-dark text-white border-secondary" id="bio" name="bio" rows="3" placeholder="FIBA certification, former teams, philosophy...">{{ coach.bio if is_edit else '' }}</textarea>
+          </div>
+
+          {% if not is_edit %}
+          <!-- Account Creation Section for Coach Login -->
+          <div class="p-3 bg-dark rounded border border-warning mb-4">
+            <h6 class="text-gold fw-bold mb-2">
+              <i class="fas fa-user-lock me-1"></i> CREATE SYSTEM LOGIN ACCOUNT FOR THIS COACH
+            </h6>
+            <div class="text-white small mb-3">Allows the coach to log in to view assigned classes and submit attendance.</div>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label text-white small">Username</label>
+                <input type="text" class="form-control bg-dark text-white border-secondary" name="username" placeholder="Leave blank to auto-generate: coach_..." autocomplete="off">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label text-white small">Initial Password</label>
+                <input type="password" class="form-control bg-dark text-white border-secondary" name="password" placeholder="Default: coach123" autocomplete="off">
+              </div>
+            </div>
+          </div>
+          {% endif %}
+
+          <div class="d-flex justify-content-between align-items-center border-top border-secondary pt-3">
+            <a href="{{ url_for('coach_list') }}" class="btn btn-zone-secondary">
+              <i class="fas fa-arrow-left me-1"></i> Back to Coaches
+            </a>
+            <button type="submit" class="btn btn-zone-primary py-2 px-4">
+              <i class="fas fa-save me-1"></i> {{ 'Save Updates' if is_edit else 'Save Coach' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

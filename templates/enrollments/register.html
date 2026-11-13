@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}Enroll Student in Class - ZONE SPORT CENTER{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="zone-card border-2">
+      <div class="zone-card-header">
+        <h4 class="mb-0 text-white fw-bold">
+          <i class="fas fa-clipboard-check text-gold me-2"></i> ENROLL STUDENT IN BASKETBALL CLASS
+        </h4>
+      </div>
+      <div class="zone-card-body">
+        <form method="POST" action="{{ url_for('enrollment_register') }}">
+          <!-- Select Student -->
+          <div class="mb-4">
+            <label class="form-label text-white" for="student_id">Select Student <span class="text-danger">*</span></label>
+            <select class="form-select form-select-lg bg-dark text-white border-secondary" id="student_id" name="student_id" required>
+              <option value="">-- Choose a student from system --</option>
+              {% for s in students %}
+              <option value="{{ s.id }}" {% if selected_student_id == s.id %}selected{% endif %}>
+                {{ s.id }} - {{ s.name }} (Phone: {{ s.phone }})
+              </option>
+              {% endfor %}
+            </select>
+            <div class="text-white small mt-2">
+              Student not in system yet? <a href="{{ url_for('student_new') }}" class="text-gold fw-bold text-decoration-underline">Click here to register a new student first</a>.
+            </div>
+          </div>
+
+          <!-- Select Class -->
+          <div class="mb-4">
+            <label class="form-label text-white" for="class_id">Select Basketball Class <span class="text-danger">*</span></label>
+            <select class="form-select form-select-lg bg-dark text-white border-secondary" id="class_id" name="class_id" required onchange="updateClassPreview()">
+              <option value="">-- Choose training class --</option>
+              {% for cl in classes %}
+              <option value="{{ cl.id }}" 
+                      data-level="{{ cl.level }}" 
+                      data-coach="{{ cl.coach_name }}" 
+                      data-fee="{{ cl.tuition_fee }}" 
+                      data-current="{{ cl.current_students }}" 
+                      data-max="{{ cl.max_students }}" 
+                      data-slots="{{ cl.available_slots }}"
+                      {% if selected_class_id == cl.id %}selected{% endif %}
+                      {% if cl.available_slots <= 0 %}disabled{% endif %}>
+                {{ cl.name }} ({{ cl.id }}) - {{ cl.available_slots }}/{{ cl.max_students }} seats left {% if cl.available_slots <= 0 %}[FULL]{% endif %}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Class Live Preview Box -->
+          <div id="classPreviewBox" class="p-3 bg-dark rounded border border-warning mb-4" style="display: none;">
+            <h6 class="text-gold fw-bold mb-3"><i class="fas fa-info-circle me-1"></i> Selected Class Details:</h6>
+            <div class="row g-3">
+              <div class="col-sm-6 text-white">Skill Level: <strong id="prevLevel" class="text-gold fs-6"></strong></div>
+              <div class="col-sm-6 text-white">Head Coach: <strong id="prevCoach" class="text-white fs-6"></strong></div>
+              <div class="col-sm-6 text-white">Tuition Fee: <strong id="prevFee" class="text-warning fs-5"></strong></div>
+              <div class="col-sm-6 text-white">Seat Availability: <strong id="prevSlots" class="text-success fs-6"></strong></div>
+            </div>
+          </div>
+
+          <!-- Enroll Date & Invoicing -->
+          <div class="row g-3 mb-4">
+            <div class="col-md-6">
+              <label class="form-label text-white" for="enroll_date">Enrollment Date</label>
+              <input type="date" class="form-control form-control-lg bg-dark text-white border-secondary" id="enroll_date" name="enroll_date" value="{{ today_str }}">
+            </div>
+            <div class="col-md-6 d-flex align-items-center mt-md-4">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="auto_payment" name="auto_payment" value="yes" checked style="width: 22px; height: 22px;">
+                <label class="form-check-label text-white fw-bold ms-2" for="auto_payment">
+                  Auto-generate tuition invoice for this enrollment
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center border-top border-secondary pt-3">
+            <a href="{{ url_for('enrollment_list') }}" class="btn btn-zone-secondary">
+              <i class="fas fa-arrow-left me-1"></i> Back to Enrollments
+            </a>
+            <button type="submit" class="btn btn-zone-primary py-2 px-4">
+              <i class="fas fa-check-circle me-1"></i> Confirm Enrollment
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function updateClassPreview() {
+    const sel = document.getElementById('class_id');
+    const opt = sel.options[sel.selectedIndex];
+    const box = document.getElementById('classPreviewBox');
+    if (opt && opt.value) {
+      document.getElementById('prevLevel').innerText = opt.getAttribute('data-level');
+      document.getElementById('prevCoach').innerText = opt.getAttribute('data-coach');
+      const feeNum = parseInt(opt.getAttribute('data-fee') || 0);
+      const feeStr = feeNum < 10000 ? '$' + feeNum.toLocaleString() : feeNum.toLocaleString() + ' đ';
+      document.getElementById('prevFee').innerText = feeStr;
+      const slots = opt.getAttribute('data-slots');
+      const max = opt.getAttribute('data-max');
+      document.getElementById('prevSlots').innerText = slots + ' / ' + max + ' seats left';
+      box.style.display = 'block';
+    } else {
+      box.style.display = 'none';
+    }
+  }
+  document.addEventListener('DOMContentLoaded', updateClassPreview);
+</script>
+{% endblock %}

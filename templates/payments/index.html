@@ -1,0 +1,280 @@
+{% extends "base.html" %}
+
+{% block title %}Tuition & Payment Management - ZONE SPORT CENTER{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+  <div>
+    <h2 class="text-white fw-bold mb-1">
+      <i class="fas fa-file-invoice-dollar text-gold me-2"></i> TUITION & REVENUE MANAGEMENT
+    </h2>
+    <p class="text-white fs-6 mb-0">Track tuition cash flow, record payments, and manage outstanding balances</p>
+  </div>
+  {% if current_user.role == 'admin' %}
+  <div>
+    <a href="{{ url_for('payment_record') }}" class="btn btn-zone-primary">
+      <i class="fas fa-hand-holding-usd me-1"></i> RECORD NEW PAYMENT
+    </a>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Revenue Summary Cards -->
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="zone-card p-4 border-2 border-success" style="background: linear-gradient(135deg, #10261c 0%, #161b24 100%);">
+      <div class="d-flex align-items-center justify-content-between">
+        <div>
+          <div class="text-white fw-bold small text-uppercase">TOTAL COLLECTED</div>
+          <div class="fs-2 fw-bold text-success mt-1">${{ "{:,.0f}".format(total_collected) if total_collected < 100000 else "{:,.0f} đ".format(total_collected) }}</div>
+          <div class="text-white small fw-bold"><i class="fas fa-check-circle text-success me-1"></i> {{ paid_count }} fully paid</div>
+        </div>
+        <div class="fs-1 text-success opacity-75">
+          <i class="fas fa-circle-check"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="zone-card p-4 border-2 border-danger" style="background: linear-gradient(135deg, #2d1519 0%, #161b24 100%);">
+      <div class="d-flex align-items-center justify-content-between">
+        <div>
+          <div class="text-white fw-bold small text-uppercase">OUTSTANDING BALANCE</div>
+          <div class="fs-2 fw-bold text-danger mt-1">${{ "{:,.0f}".format(total_debt) if total_debt < 100000 else "{:,.0f} đ".format(total_debt) }}</div>
+          <div class="text-white small fw-bold"><i class="fas fa-exclamation-triangle text-danger me-1"></i> {{ unpaid_count }} unpaid records</div>
+        </div>
+        <div class="fs-1 text-danger opacity-75">
+          <i class="fas fa-clock"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="zone-card p-4 border-2 border-warning" style="background: linear-gradient(135deg, #261f10 0%, #161b24 100%);">
+      <div class="d-flex align-items-center justify-content-between">
+        <div>
+          <div class="text-white fw-bold small text-uppercase">TOTAL RECEIVABLE</div>
+          <div class="fs-2 fw-bold text-gold mt-1">${{ "{:,.0f}".format(total_receivable) if total_receivable < 100000 else "{:,.0f} đ".format(total_receivable) }}</div>
+          <div class="text-white small fw-bold">Collection Rate: <span class="text-warning fs-6">{{ collection_rate }}%</span></div>
+        </div>
+        <div class="fs-1 text-gold opacity-75">
+          <i class="fas fa-coins"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Filters & Search -->
+<div class="zone-card mb-4 p-3 border-2">
+  <form method="GET" action="{{ url_for('payment_list') }}" class="row g-2 align-items-center">
+    <div class="col-md-5">
+      <div class="input-group input-group-lg">
+        <span class="input-group-text bg-dark border-secondary text-gold"><i class="fas fa-search"></i></span>
+        <input type="text" name="q" class="form-control bg-dark text-white border-secondary" placeholder="Search by invoice ID, student name, phone..." value="{{ query or '' }}">
+      </div>
+    </div>
+    <div class="col-md-4">
+      <select name="status" class="form-select form-select-lg bg-dark text-white border-secondary">
+        <option value="">-- All Payment Statuses --</option>
+        <option value="Đã thanh toán" {% if selected_status in ['Đã thanh toán', 'Paid'] %}selected{% endif %}>Paid (Completed)</option>
+        <option value="Chưa thanh toán" {% if selected_status in ['Chưa thanh toán', 'Unpaid'] %}selected{% endif %}>Unpaid (Outstanding Debt)</option>
+      </select>
+    </div>
+    <div class="col-md-3 d-flex gap-2">
+      <button type="submit" class="btn btn-zone-primary w-100">
+        <i class="fas fa-filter me-1"></i> FILTER
+      </button>
+      {% if query or selected_status %}
+      <a href="{{ url_for('payment_list') }}" class="btn btn-zone-secondary" title="Clear Filters">
+        <i class="fas fa-times"></i>
+      </a>
+      {% endif %}
+    </div>
+  </form>
+</div>
+
+<!-- Payments Table -->
+<div class="zone-card border-2">
+  <div class="zone-card-header d-flex justify-content-between align-items-center">
+    <div class="d-flex align-items-center gap-2">
+      <h5 class="mb-0 text-white fw-bold">
+        <i class="fas fa-receipt text-gold me-2"></i> TUITION PAYMENT LEDGER
+      </h5>
+      <span class="badge bg-warning text-dark fw-bold fs-6">{{ payments|length }} Invoices</span>
+    </div>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-zone align-middle">
+      <thead>
+        <tr>
+          <th>Invoice ID</th>
+          <th>Student</th>
+          <th>Class</th>
+          <th>Course Fee</th>
+          <th>Paid Amount</th>
+          <th>Remaining</th>
+          <th>Status</th>
+          <th>Method</th>
+          <th>Payment Date</th>
+          {% if current_user.role == 'admin' %}
+          <th class="text-center">Action</th>
+          {% endif %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in payments %}
+        <tr>
+          <td><span class="badge-id">{{ p.id }}</span></td>
+          <td>
+            <a href="{{ url_for('student_detail', student_id=p.student_id) }}" class="text-gold fw-bold text-decoration-none hover-underline fs-6">
+              {{ p.student_name }}
+            </a>
+            <div class="text-white small"><i class="fas fa-phone-alt fa-xs me-1 text-gold"></i> {{ p.student_phone }}</div>
+          </td>
+          <td>
+            <a href="{{ url_for('class_detail', class_id=p.class_id) }}" class="text-gold text-decoration-none hover-underline fw-bold">
+              {{ p.class_name }}
+            </a>
+          </td>
+          <td class="fw-bold text-white fs-6">${{ "{:,.0f}".format(p.amount) if p.amount < 100000 else "{:,.0f} đ".format(p.amount) }}</td>
+          <td class="fw-bold text-success fs-6">${{ "{:,.0f}".format(p.paid_amount) if p.paid_amount < 100000 else "{:,.0f} đ".format(p.paid_amount) }}</td>
+          <td class="fw-bold text-danger fs-6">
+            {% if p.remaining > 0 %}
+              ${{ "{:,.0f}".format(p.remaining) if p.remaining < 100000 else "{:,.0f} đ".format(p.remaining) }}
+            {% else %}
+              <span class="badge bg-success text-white">0</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if p.status in ['Đã thanh toán', 'Paid'] %}
+              <span class="badge-status badge-paid"><i class="fas fa-check-circle me-1"></i> Paid</span>
+            {% else %}
+              <span class="badge-status badge-unpaid"><i class="fas fa-clock me-1"></i> Unpaid</span>
+            {% endif %}
+          </td>
+          <td>
+            <span class="badge bg-dark border border-secondary text-white fw-bold px-2 py-1">
+              {{ p.payment_method or 'None' }}
+            </span>
+          </td>
+          <td><span class="text-white fw-bold">{{ p.payment_date or '---' }}</span></td>
+          {% if current_user.role == 'admin' %}
+          <td class="text-center">
+            <button type="button" class="btn btn-sm btn-zone-outline py-1 px-3" onclick="openUpdateModal('{{ p.id }}', '{{ p.student_name }}', '{{ p.class_name }}', '{{ p.amount }}', '{{ p.paid_amount }}', '{{ p.status }}', '{{ p.payment_method or 'Cash' }}')" title="Update Payment">
+              <i class="fas fa-edit me-1"></i> Update
+            </button>
+          </td>
+          {% endif %}
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="10" class="text-center py-5 text-white">
+            <i class="fas fa-file-invoice-dollar fa-3x mb-3 text-warning d-block"></i>
+            <h5>No tuition records matched your filter criteria!</h5>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal Update Payment -->
+<div class="modal fade" id="updatePaymentModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-dark text-white border-warning">
+      <form id="updatePaymentForm" method="POST" action="">
+        <div class="modal-header border-warning">
+          <h5 class="modal-title text-gold fw-bold"><i class="fas fa-hand-holding-usd me-2"></i> Update Tuition Invoice</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body text-white">
+          <div class="p-3 bg-dark rounded border border-secondary mb-3">
+            <div class="d-flex justify-content-between mb-1">
+              <span>Invoice ID:</span>
+              <strong id="mId" class="text-gold"></strong>
+            </div>
+            <div class="d-flex justify-content-between mb-1">
+              <span>Student:</span>
+              <strong id="mStudent" class="text-white"></strong>
+            </div>
+            <div class="d-flex justify-content-between mb-1">
+              <span>Class:</span>
+              <strong id="mClass" class="text-white"></strong>
+            </div>
+            <div class="d-flex justify-content-between">
+              <span>Standard Fee:</span>
+              <strong id="mTotal" class="text-warning fs-5"></strong>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label text-white" for="mPaidAmount">Actual Paid Amount <span class="text-danger">*</span></label>
+            <input type="number" class="form-control form-control-lg bg-dark text-white border-secondary" id="mPaidAmount" name="paid_amount" required min="0" step="10000" oninput="checkAutoStatus()">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label text-white" for="mStatus">Payment Status</label>
+            <select class="form-select bg-dark text-white border-secondary" id="mStatus" name="status">
+              <option value="Đã thanh toán">Paid (Completed)</option>
+              <option value="Chưa thanh toán">Unpaid (Outstanding Balance)</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label text-white" for="mMethod">Payment Method</label>
+            <select class="form-select bg-dark text-white border-secondary" id="mMethod" name="payment_method">
+              <option value="Chuyển khoản QR">QR Code Transfer (Online / Banking)</option>
+              <option value="Tiền mặt">Cash (Front Desk)</option>
+              <option value="Thẻ tín dụng">Card / POS</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label text-white" for="mNote">Transaction Note</label>
+            <input type="text" class="form-control bg-dark text-white border-secondary" id="mNote" name="note" placeholder="Bank transaction ID or payment notes">
+          </div>
+        </div>
+        <div class="modal-footer border-secondary">
+          <button type="button" class="btn btn-zone-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-zone-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  let currentTotalFee = 0;
+
+  function openUpdateModal(id, student, className, amount, paid, status, method) {
+    document.getElementById('mId').innerText = id;
+    document.getElementById('mStudent').innerText = student;
+    document.getElementById('mClass').innerText = className;
+    currentTotalFee = parseInt(amount);
+    const feeStr = currentTotalFee < 100000 ? '$' + currentTotalFee.toLocaleString() : currentTotalFee.toLocaleString('vi-VN') + ' đ';
+    document.getElementById('mTotal').innerText = feeStr;
+    document.getElementById('mPaidAmount').value = paid;
+    document.getElementById('mStatus').value = status;
+    document.getElementById('mMethod').value = method;
+    document.getElementById('updatePaymentForm').action = "/payments/" + id + "/update";
+    const modal = new bootstrap.Modal(document.getElementById('updatePaymentModal'));
+    modal.show();
+  }
+
+  function checkAutoStatus() {
+    const paid = parseInt(document.getElementById('mPaidAmount').value || 0);
+    const selStatus = document.getElementById('mStatus');
+    if (paid >= currentTotalFee) {
+      selStatus.value = "Đã thanh toán";
+    } else {
+      selStatus.value = "Chưa thanh toán";
+    }
+  }
+</script>
+{% endblock %}

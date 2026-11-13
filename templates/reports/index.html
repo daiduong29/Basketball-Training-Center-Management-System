@@ -1,0 +1,321 @@
+{% extends "base.html" %}
+
+{% block title %}Reports & Analytics - ZONE SPORT CENTER{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+  <div>
+    <h2 class="text-white fw-bold mb-1">
+      <i class="fas fa-chart-line text-gold me-2"></i> COMPREHENSIVE REPORTS & ANALYTICS
+    </h2>
+    <p class="text-white fs-6 mb-0">Track center performance indicators, class enrollment ratios, and financial revenue trends</p>
+  </div>
+  <div class="d-flex gap-2">
+    <button onclick="window.print()" class="btn btn-zone-secondary">
+      <i class="fas fa-print me-1"></i> Print Report
+    </button>
+  </div>
+</div>
+
+<!-- 5 Scoreboard Cards -->
+<div class="row g-3 mb-4">
+  <div class="col-xl-2 col-md-4 col-sm-6">
+    <div class="stat-card p-3">
+      <div>
+        <div class="stat-label text-white small">STUDENTS</div>
+        <div class="stat-value fs-2 text-gold">{{ summary.total_students }}</div>
+        <div class="text-white small fw-bold">Active trainees</div>
+      </div>
+      <div class="stat-icon" style="width: 50px; height: 50px; font-size: 1.4rem;">
+        <i class="fas fa-user-graduate"></i>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-2 col-md-4 col-sm-6">
+    <div class="stat-card stat-orange p-3">
+      <div>
+        <div class="stat-label text-white small">ACTIVE CLASSES</div>
+        <div class="stat-value fs-2 text-orange">{{ summary.active_classes }}</div>
+        <div class="text-white small fw-bold">/ {{ summary.total_classes }} total classes</div>
+      </div>
+      <div class="stat-icon text-orange" style="width: 50px; height: 50px; font-size: 1.4rem;">
+        <i class="fas fa-basketball-ball"></i>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-2 col-md-4 col-sm-6">
+    <div class="stat-card stat-blue p-3">
+      <div>
+        <div class="stat-label text-white small">ENROLLMENTS</div>
+        <div class="stat-value fs-2 text-white">{{ summary.total_enrollments }}</div>
+        <div class="text-white small fw-bold">Total registered</div>
+      </div>
+      <div class="stat-icon text-info" style="width: 50px; height: 50px; font-size: 1.4rem;">
+        <i class="fas fa-clipboard-list"></i>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-3 col-md-6">
+    <div class="stat-card stat-green p-3">
+      <div>
+        <div class="stat-label text-white small">COLLECTED REVENUE</div>
+        <div class="stat-value fs-3 text-success">${{ "{:,.0f}".format(summary.total_collected) if summary.total_collected < 100000 else "{:,.0f} đ".format(summary.total_collected) }}</div>
+        <div class="text-white small fw-bold">Cash, QR & Card</div>
+      </div>
+      <div class="stat-icon text-success" style="width: 50px; height: 50px; font-size: 1.4rem;">
+        <i class="fas fa-wallet"></i>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-3 col-md-6">
+    <div class="stat-card p-3">
+      <div>
+        <div class="stat-label text-white small">ATTENDANCE RATE</div>
+        <div class="stat-value fs-2 text-gold">{{ summary.attendance_rate }}%</div>
+        <div class="text-white small fw-bold">Practice consistency</div>
+      </div>
+      <div class="stat-icon text-warning" style="width: 50px; height: 50px; font-size: 1.4rem;">
+        <i class="fas fa-user-check"></i>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Charts Section -->
+<div class="row g-4 mb-4">
+  <!-- Monthly Revenue Trend Chart -->
+  <div class="col-lg-8">
+    <div class="zone-card h-100 border-2">
+      <div class="zone-card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 text-white fw-bold">
+          <i class="fas fa-chart-area text-gold me-2"></i> MONTHLY REVENUE TREND (2026)
+        </h5>
+        <span class="badge bg-warning text-dark fw-bold">Financial Flow</span>
+      </div>
+      <div class="zone-card-body">
+        <div style="height: 320px; position: relative;">
+          <canvas id="monthlyRevenueChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Class Breakdown Pie Chart -->
+  <div class="col-lg-4">
+    <div class="zone-card h-100 border-2">
+      <div class="zone-card-header">
+        <h5 class="mb-0 text-white fw-bold">
+          <i class="fas fa-chart-pie text-orange me-2"></i> CLASS STUDENT DISTRIBUTION
+        </h5>
+      </div>
+      <div class="zone-card-body d-flex flex-column align-items-center justify-content-center">
+        <div style="height: 250px; width: 250px; position: relative;">
+          <canvas id="classBreakdownChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Monthly Details Table -->
+<div class="zone-card mb-4 border-2">
+  <div class="zone-card-header">
+    <h5 class="mb-0 text-white fw-bold">
+      <i class="fas fa-calendar-alt text-gold me-2"></i> MONTHLY ACTIVITY & REVENUE BREAKDOWN
+    </h5>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-zone align-middle">
+      <thead>
+        <tr>
+          <th>Period</th>
+          <th>Month Code</th>
+          <th>New Students</th>
+          <th>Enrollments</th>
+          <th>Tuition Revenue</th>
+          <th>Performance Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for m in monthly_data %}
+        <tr>
+          <td class="fw-bold text-white fs-6">{{ m.month }}</td>
+          <td><span class="badge-id">{{ m.month_code }}</span></td>
+          <td>
+            <span class="badge bg-dark border border-secondary text-white fw-bold fs-7">{{ m.new_students }} students</span>
+          </td>
+          <td>
+            <span class="badge bg-dark border border-secondary text-info fw-bold fs-7">{{ m.enrollments }} enrolls</span>
+          </td>
+          <td class="fw-bold text-success fs-5">
+            ${{ "{:,.0f}".format(m.revenue) if m.revenue < 100000 else "{:,.0f} đ".format(m.revenue) }}
+          </td>
+          <td>
+            {% if m.revenue > 3000000 %}
+              <span class="badge bg-success text-white fw-bold px-3 py-1"><i class="fas fa-arrow-up me-1"></i> Outstanding Growth</span>
+            {% elif m.revenue > 0 %}
+              <span class="badge bg-warning text-dark fw-bold px-3 py-1"><i class="fas fa-check me-1"></i> Active</span>
+            {% else %}
+              <span class="badge bg-secondary text-white px-3 py-1">No Transactions</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Class Breakdown Detailed Table -->
+<div class="zone-card border-2">
+  <div class="zone-card-header">
+    <h5 class="mb-0 text-white fw-bold">
+      <i class="fas fa-basketball-ball text-orange me-2"></i> CLASS CAPACITY & FILL RATE BREAKDOWN
+    </h5>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-zone align-middle">
+      <thead>
+        <tr>
+          <th>Class ID</th>
+          <th>Class Name</th>
+          <th>Level</th>
+          <th>Current Enrolled</th>
+          <th>Max Capacity</th>
+          <th>Seats Available</th>
+          <th>Fill Rate</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for cl in summary.class_stats %}
+        <tr>
+          <td><span class="badge-id">{{ cl.id }}</span></td>
+          <td class="fw-bold fs-6">
+            <a href="{{ url_for('class_detail', class_id=cl.id) }}" class="text-gold text-decoration-none hover-underline">
+              {{ cl.name }}
+            </a>
+          </td>
+          <td><span class="badge-level {{ cl.level }}">{{ cl.level }}</span></td>
+          <td class="fw-bold text-gold fs-6">{{ cl.count }} Students</td>
+          <td class="text-white fw-bold">{{ cl.max }} Seats</td>
+          <td>
+            {% if cl.max - cl.count > 0 %}
+              <span class="badge bg-success text-white fw-bold px-2 py-1">{{ cl.max - cl.count }} available</span>
+            {% else %}
+              <span class="badge bg-danger text-white fw-bold px-2 py-1">Full</span>
+            {% endif %}
+          </td>
+          <td style="min-width: 150px;">
+            <div class="progress progress-zone mb-1">
+              <div class="progress-bar progress-bar-zone" role="progressbar" style="width: {{ cl.fill }}%;"></div>
+            </div>
+            <div class="text-white fw-bold" style="font-size: 0.85rem;">{{ cl.fill }}% capacity</div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const monthlyData = {{ monthly_data | tojson }};
+  const mLabels = monthlyData.map(d => d.month);
+  const mRevenues = monthlyData.map(d => d.revenue);
+
+  // Line Chart for Monthly Revenue
+  const ctxRev = document.getElementById('monthlyRevenueChart').getContext('2d');
+  new Chart(ctxRev, {
+    type: 'line',
+    data: {
+      labels: mLabels,
+      datasets: [{
+        label: 'Revenue Generated',
+        data: mRevenues,
+        borderColor: '#ffc107',
+        backgroundColor: 'rgba(255, 193, 7, 0.2)',
+        fill: true,
+        tension: 0.35,
+        borderWidth: 3,
+        pointBackgroundColor: '#ff5e00',
+        pointBorderColor: '#ffffff',
+        pointBorderWidth: 2,
+        pointRadius: 6,
+        pointHoverRadius: 8
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { labels: { color: '#ffffff', font: { family: 'Be Vietnam Pro', size: 12, weight: 'bold' } } },
+        tooltip: {
+          backgroundColor: '#0d1017',
+          titleColor: '#ffc107',
+          bodyColor: '#ffffff',
+          borderColor: '#ffc107',
+          borderWidth: 1.5,
+          callbacks: {
+            label: function(context) {
+              const val = context.parsed.y;
+              return val < 100000 ? ' Revenue: $' + val.toLocaleString() : ' Revenue: ' + val.toLocaleString('vi-VN') + ' đ';
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: '#ffffff', font: { family: 'Be Vietnam Pro', weight: '600' } },
+          grid: { color: 'rgba(255, 255, 255, 0.08)' }
+        },
+        y: {
+          beginAtZero: true,
+          ticks: {
+            color: '#ffffff',
+            font: { family: 'Be Vietnam Pro', weight: '600' },
+            callback: function(val) {
+              return val >= 1000000 ? (val / 1000000) + 'M' : val;
+            }
+          },
+          grid: { color: 'rgba(255, 255, 255, 0.08)' }
+        }
+      }
+    }
+  });
+
+  // Pie Chart for Class Breakdown
+  const classStats = {{ summary.class_stats | tojson }};
+  const cNames = classStats.map(c => c.name.length > 15 ? c.name.substring(0, 15) + '...' : c.name);
+  const cCounts = classStats.map(c => c.count);
+
+  const ctxPie = document.getElementById('classBreakdownChart').getContext('2d');
+  new Chart(ctxPie, {
+    type: 'pie',
+    data: {
+      labels: cNames,
+      datasets: [{
+        data: cCounts,
+        backgroundColor: ['#ffc107', '#ff5e00', '#10b981', '#06b6d4', '#8b5cf6'],
+        borderColor: '#161b24',
+        borderWidth: 3
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { color: '#ffffff', font: { family: 'Be Vietnam Pro', size: 11, weight: 'bold' }, boxWidth: 12 }
+        }
+      }
+    }
+  });
+</script>
+{% endblock %}

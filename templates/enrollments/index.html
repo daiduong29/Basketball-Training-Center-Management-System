@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block title %}Class Enrollments - ZONE SPORT CENTER{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+  <div>
+    <h2 class="text-white fw-bold mb-1">
+      <i class="fas fa-clipboard-list text-gold me-2"></i> CLASS ENROLLMENTS & ROSTERS
+    </h2>
+    <p class="text-white fs-6 mb-0">Track registered student rosters, monitor seat capacity, and manage course enrollments</p>
+  </div>
+  {% if current_user.role == 'admin' %}
+  <div>
+    <a href="{{ url_for('enrollment_register') }}" class="btn btn-zone-primary">
+      <i class="fas fa-user-plus me-1"></i> ENROLL STUDENT IN CLASS
+    </a>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Filters -->
+<div class="zone-card mb-4 p-3 border-2">
+  <form method="GET" action="{{ url_for('enrollment_list') }}" class="row g-2 align-items-center">
+    <div class="col-md-5">
+      <select name="class_id" class="form-select form-select-lg bg-dark text-white border-secondary">
+        <option value="">-- Filter by All Classes --</option>
+        {% for cl in classes %}
+        <option value="{{ cl.id }}" {% if selected_class_id == cl.id %}selected{% endif %}>
+          {{ cl.name }} ({{ cl.id }})
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-5">
+      <select name="status" class="form-select form-select-lg bg-dark text-white border-secondary">
+        <option value="">-- All Statuses --</option>
+        <option value="Đang học" {% if selected_status == 'Đang học' %}selected{% endif %}>Active / Enrolled</option>
+        <option value="Đã hủy" {% if selected_status == 'Đã hủy' %}selected{% endif %}>Cancelled</option>
+      </select>
+    </div>
+    <div class="col-md-2 d-flex gap-2">
+      <button type="submit" class="btn btn-zone-primary w-100">
+        <i class="fas fa-filter me-1"></i> FILTER
+      </button>
+      {% if selected_class_id or selected_status %}
+      <a href="{{ url_for('enrollment_list') }}" class="btn btn-zone-secondary" title="Clear Filters">
+        <i class="fas fa-times"></i>
+      </a>
+      {% endif %}
+    </div>
+  </form>
+</div>
+
+<!-- Enrollments Table -->
+<div class="zone-card border-2">
+  <div class="zone-card-header d-flex justify-content-between align-items-center">
+    <div class="d-flex align-items-center gap-2">
+      <h5 class="mb-0 text-white fw-bold">
+        <i class="fas fa-users text-gold me-2"></i> ENROLLMENT RECORDS
+      </h5>
+      <span class="badge bg-warning text-dark fw-bold fs-6">{{ enrollments|length }} Records</span>
+    </div>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-zone align-middle">
+      <thead>
+        <tr>
+          <th>Enroll ID</th>
+          <th>Student ID</th>
+          <th>Student Name</th>
+          <th>Class Name</th>
+          <th>Level</th>
+          <th>Enroll Date</th>
+          <th>Tuition Fee</th>
+          <th>Status</th>
+          {% if current_user.role == 'admin' %}
+          <th class="text-center">Action</th>
+          {% endif %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for e in enrollments %}
+        <tr>
+          <td><span class="badge-id">{{ e.id }}</span></td>
+          <td><span class="badge-id">{{ e.student_id }}</span></td>
+          <td class="fw-bold fs-6">
+            <a href="{{ url_for('student_detail', student_id=e.student_id) }}" class="text-gold text-decoration-none hover-underline">
+              {{ e.student_name }}
+            </a>
+          </td>
+          <td>
+            <a href="{{ url_for('class_detail', class_id=e.class_id) }}" class="text-gold fw-bold text-decoration-none hover-underline">
+              {{ e.class_name }}
+            </a>
+          </td>
+          <td><span class="badge-level {{ e.class_level }}">{{ e.class_level }}</span></td>
+          <td><span class="text-white fw-bold">{{ e.enroll_date }}</span></td>
+          <td class="fw-bold text-gold fs-6">${{ "{:,.0f}".format(e.tuition_fee) if e.tuition_fee < 10000 else "{:,.0f} đ".format(e.tuition_fee) }}</td>
+          <td>
+            {% if e.status in ['Đang học', 'Active', 'Enrolled'] %}
+              <span class="badge bg-success text-white fw-bold px-3 py-1">Enrolled</span>
+            {% else %}
+              <span class="badge bg-danger text-white fw-bold px-3 py-1">Cancelled</span>
+            {% endif %}
+          </td>
+          {% if current_user.role == 'admin' %}
+          <td class="text-center">
+            {% if e.status in ['Đang học', 'Active', 'Enrolled'] %}
+            <button type="button" class="btn btn-sm btn-zone-danger py-1 px-3" onclick="confirmCancelEnrollment('{{ e.id }}', '{{ e.student_name }}', '{{ e.class_name }}')" title="Cancel Enrollment">
+              <i class="fas fa-times me-1"></i> Cancel
+            </button>
+            {% else %}
+            <span class="text-muted">---</span>
+            {% endif %}
+          </td>
+          {% endif %}
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="9" class="text-center py-5 text-white">
+            <i class="fas fa-clipboard-list fa-3x mb-3 text-warning d-block"></i>
+            <h5>No enrollment records matched your filter criteria!</h5>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal Cancel Enrollment -->
+<div class="modal fade" id="cancelEnrollModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-dark text-white border-danger">
+      <div class="modal-header border-danger">
+        <h5 class="modal-title text-danger"><i class="fas fa-exclamation-triangle me-2"></i> Confirm Cancellation</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-white">
+        Are you sure you want to cancel the enrollment of <strong id="cancelStudent" class="text-gold"></strong> from class <strong id="cancelClass" class="text-white"></strong>?
+      </div>
+      <div class="modal-footer border-secondary">
+        <button type="button" class="btn btn-zone-secondary" data-bs-dismiss="modal">Close</button>
+        <form id="cancelEnrollForm" method="POST" action="">
+          <button type="submit" class="btn btn-danger fw-bold">Confirm Cancel</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function confirmCancelEnrollment(enrollId, studentName, className) {
+    document.getElementById('cancelStudent').innerText = studentName;
+    document.getElementById('cancelClass').innerText = className;
+    document.getElementById('cancelEnrollForm').action = "/enrollments/" + enrollId + "/cancel";
+    const modal = new bootstrap.Modal(document.getElementById('cancelEnrollModal'));
+    modal.show();
+  }
+</script>
+{% endblock %}

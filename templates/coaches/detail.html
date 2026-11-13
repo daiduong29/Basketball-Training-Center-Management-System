@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}Coach Profile - {{ coach.name }} - ZONE SPORT CENTER{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+  <div class="d-flex align-items-center gap-3">
+    <a href="{{ url_for('coach_list') }}" class="btn btn-zone-secondary btn-sm" title="Back to Coaches">
+      <i class="fas fa-arrow-left fa-lg"></i>
+    </a>
+    <div>
+      <div class="d-flex align-items-center gap-2 mb-1">
+        <span class="badge-id">{{ coach.id }}</span>
+        <span class="badge bg-success text-white fw-bold px-3 py-1">{{ coach.status }}</span>
+      </div>
+      <h2 class="text-white fw-bold mb-0">
+        COACH: <span class="text-gold">{{ coach.name }}</span>
+      </h2>
+    </div>
+  </div>
+  {% if current_user.role == 'admin' %}
+  <div class="d-flex gap-2">
+    <a href="{{ url_for('coach_edit', coach_id=coach.id) }}" class="btn btn-zone-outline">
+      <i class="fas fa-edit me-1"></i> EDIT COACH PROFILE
+    </a>
+  </div>
+  {% endif %}
+</div>
+
+<div class="row g-4">
+  <!-- Left Column: Coach Bio Card -->
+  <div class="col-lg-4">
+    <div class="zone-card mb-4 border-2">
+      <div class="zone-card-body text-center p-4">
+        <div class="stat-icon text-orange mx-auto mb-3" style="width: 88px; height: 88px; font-size: 2.8rem;">
+          <i class="fas fa-user-shield"></i>
+        </div>
+        <h4 class="text-white fw-bold mb-1">{{ coach.name }}</h4>
+        <div class="badge bg-warning text-dark fw-bold px-3 py-1 mb-3">Zone Arena Coaching Staff</div>
+
+        <div class="text-start border-top border-secondary pt-3">
+          <div class="mb-3 d-flex justify-content-between align-items-center">
+            <span class="text-white"><i class="fas fa-phone-alt text-gold me-2"></i>Phone:</span>
+            <a href="tel:{{ coach.phone }}" class="text-gold fw-bold text-decoration-none fs-6">{{ coach.phone }}</a>
+          </div>
+          <div class="mb-3 d-flex justify-content-between align-items-center">
+            <span class="text-white"><i class="fas fa-envelope text-gold me-2"></i>Email:</span>
+            <span class="text-white fw-bold text-truncate" style="max-width: 190px;">{{ coach.email }}</span>
+          </div>
+          <div class="mb-3 d-flex justify-content-between align-items-center">
+            <span class="text-white"><i class="fas fa-medal text-gold me-2"></i>Experience:</span>
+            <span class="text-gold fw-bold fs-6">{{ coach.experience or '---' }}</span>
+          </div>
+          <div class="mb-3">
+            <span class="text-white d-block mb-1"><i class="fas fa-star text-gold me-2"></i>Specialty:</span>
+            <span class="text-white fw-bold fs-6">{{ coach.specialty or 'General Basketball' }}</span>
+          </div>
+          {% if coach.bio %}
+          <div class="p-3 bg-dark rounded border border-warning small mt-3">
+            <span class="text-gold fw-bold d-block mb-1 fs-6"><i class="fas fa-info-circle me-1"></i> Biography & Philosophy:</span>
+            <span class="text-white">{{ coach.bio }}</span>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Column: Classes Assigned to Coach -->
+  <div class="col-lg-8">
+    <div class="zone-card border-2">
+      <div class="zone-card-header">
+        <div class="d-flex align-items-center gap-2">
+          <h5 class="mb-0 text-white fw-bold">
+            <i class="fas fa-basketball-ball text-orange me-2"></i> ASSIGNED BASKETBALL CLASSES
+          </h5>
+          <span class="badge bg-warning text-dark fw-bold fs-6">{{ coach.classes|length }} Classes</span>
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-zone align-middle">
+          <thead>
+            <tr>
+              <th>Class ID</th>
+              <th>Class Name</th>
+              <th>Level</th>
+              <th>Schedule</th>
+              <th>Enrolled</th>
+              <th>Status</th>
+              <th class="text-center">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for cl in coach.classes %}
+            <tr>
+              <td><span class="badge-id">{{ cl.id }}</span></td>
+              <td class="fw-bold fs-6">
+                <a href="{{ url_for('class_detail', class_id=cl.id) }}" class="text-gold text-decoration-none hover-underline">
+                  {{ cl.name }}
+                </a>
+              </td>
+              <td><span class="badge-level {{ cl.level }}">{{ cl.level }}</span></td>
+              <td><span class="text-white fw-bold">{{ cl.schedule }}</span></td>
+              <td>
+                <span class="text-gold fw-bold fs-6">{{ cl.current_students }}</span> / <span class="text-white">{{ cl.max_students }} seats</span>
+              </td>
+              <td>
+                <span class="badge {% if cl.status in ['Đang học', 'In Progress', 'Active'] %}bg-success text-white{% elif cl.status in ['Đang mở đăng ký', 'Open', 'Enrolling'] %}bg-warning text-dark{% else %}bg-secondary text-white{% endif %} px-3 py-1">
+                  {{ cl.status }}
+                </span>
+              </td>
+              <td class="text-center">
+                <a href="{{ url_for('class_detail', class_id=cl.id) }}" class="btn btn-sm btn-zone-outline py-1 px-3" title="View Class Details">
+                  <i class="fas fa-arrow-right"></i>
+                </a>
+              </td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="7" class="text-center py-5 text-white">
+                No basketball classes currently assigned to this coach.
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

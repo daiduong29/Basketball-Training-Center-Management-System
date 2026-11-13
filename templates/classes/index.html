@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+
+{% block title %}Basketball Classes - ZONE SPORT CENTER{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+  <div>
+    <h2 class="text-white fw-bold mb-1">
+      <i class="fas fa-basketball-ball text-gold me-2"></i> BASKETBALL TRAINING CLASSES
+    </h2>
+    <p class="text-white fs-6 mb-0">Professional basketball training programs from beginner fundamentals to elite competitive levels</p>
+  </div>
+  {% if current_user.role == 'admin' %}
+  <div>
+    <a href="{{ url_for('class_new') }}" class="btn btn-zone-primary">
+      <i class="fas fa-plus-circle me-1"></i> ADD NEW CLASS
+    </a>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Filters Card -->
+<div class="zone-card mb-4 p-3 border-2">
+  <form method="GET" action="{{ url_for('class_list') }}" class="row g-2 align-items-center">
+    <div class="col-md-4">
+      <div class="input-group input-group-lg">
+        <span class="input-group-text bg-dark border-secondary text-gold"><i class="fas fa-search"></i></span>
+        <input type="text" name="q" class="form-control bg-dark text-white border-secondary" placeholder="Search by class name, ID..." value="{{ query or '' }}">
+      </div>
+    </div>
+    <div class="col-md-3">
+      <select name="level" class="form-select form-select-lg bg-dark text-white border-secondary">
+        <option value="">-- All Levels --</option>
+        <option value="Beginner" {% if selected_level == 'Beginner' %}selected{% endif %}>Beginner</option>
+        <option value="Intermediate" {% if selected_level == 'Intermediate' %}selected{% endif %}>Intermediate</option>
+        <option value="Advanced" {% if selected_level == 'Advanced' %}selected{% endif %}>Advanced</option>
+      </select>
+    </div>
+    <div class="col-md-3">
+      <select name="status" class="form-select form-select-lg bg-dark text-white border-secondary">
+        <option value="">-- All Statuses --</option>
+        <option value="Đang học" {% if selected_status == 'Đang học' %}selected{% endif %}>In Progress</option>
+        <option value="Đang mở đăng ký" {% if selected_status == 'Đang mở đăng ký' %}selected{% endif %}>Open for Registration</option>
+        <option value="Đã kết thúc" {% if selected_status == 'Đã kết thúc' %}selected{% endif %}>Finished</option>
+      </select>
+    </div>
+    <div class="col-md-2 d-flex gap-2">
+      <button type="submit" class="btn btn-zone-primary w-100">
+        <i class="fas fa-filter me-1"></i> FILTER
+      </button>
+      {% if query or selected_level or selected_status %}
+      <a href="{{ url_for('class_list') }}" class="btn btn-zone-secondary" title="Clear Filters">
+        <i class="fas fa-times"></i>
+      </a>
+      {% endif %}
+    </div>
+  </form>
+</div>
+
+<!-- Classes Grid -->
+<div class="row g-4">
+  {% for cl in classes %}
+  <div class="col-lg-6 col-xl-4">
+    <div class="zone-card h-100 d-flex flex-column border-2">
+      <div class="zone-card-header d-flex justify-content-between align-items-center">
+        <div>
+          <span class="badge-id me-1">{{ cl.id }}</span>
+          <span class="badge-level {{ cl.level }}">{{ cl.level }}</span>
+        </div>
+        <span class="badge {% if cl.status in ['Đang học', 'In Progress', 'Active'] %}bg-success text-white{% elif cl.status in ['Đang mở đăng ký', 'Open', 'Enrolling'] %}bg-warning text-dark{% else %}bg-secondary text-white{% endif %} fw-bold px-3 py-1 fs-7">
+          {{ cl.status }}
+        </span>
+      </div>
+
+      <div class="zone-card-body flex-grow-1 p-3">
+        <h5 class="text-white fw-bold mb-3 fs-5">
+          <a href="{{ url_for('class_detail', class_id=cl.id) }}" class="text-gold text-decoration-none hover-underline">
+            {{ cl.name }}
+          </a>
+        </h5>
+
+        <div class="mb-3">
+          <div class="py-2 border-bottom border-secondary d-flex justify-content-between align-items-center">
+            <span class="text-white"><i class="fas fa-user-shield text-gold me-2"></i>Head Coach:</span>
+            <span class="text-gold fw-bold fs-6">{{ cl.coach_name }}</span>
+          </div>
+          <div class="py-2 border-bottom border-secondary d-flex justify-content-between align-items-center">
+            <span class="text-white"><i class="fas fa-clock text-gold me-2"></i>Schedule:</span>
+            <span class="text-white fw-bold">{{ cl.schedule or 'TBA' }}</span>
+          </div>
+          <div class="py-2 border-bottom border-secondary d-flex justify-content-between align-items-center">
+            <span class="text-white"><i class="fas fa-map-marker-alt text-gold me-2"></i>Court / Venue:</span>
+            <span class="text-white fw-bold">{{ cl.location or 'Zone Arena Court' }}</span>
+          </div>
+          <div class="py-2 border-bottom border-secondary d-flex justify-content-between align-items-center">
+            <span class="text-white"><i class="fas fa-money-bill-wave text-gold me-2"></i>Tuition Fee:</span>
+            <span class="text-gold fw-bold fs-5">${{ "{:,.0f}".format(cl.tuition_fee) if cl.tuition_fee < 10000 else "{:,.0f} đ".format(cl.tuition_fee) }}</span>
+          </div>
+        </div>
+
+        <!-- Capacity Progress -->
+        <div class="p-2 bg-dark rounded border border-secondary mb-2">
+          <div class="d-flex justify-content-between text-white fw-bold small mb-1">
+            <span>Class Capacity:</span>
+            <span class="{% if cl.current_students >= cl.max_students %}text-danger{% else %}text-gold{% endif %}">
+              {{ cl.current_students }} / {{ cl.max_students }} Students ({{ cl.fill_percentage }}%)
+            </span>
+          </div>
+          <div class="progress progress-zone">
+            <div class="progress-bar {% if cl.current_students >= cl.max_students %}bg-danger{% else %}progress-bar-zone{% endif %}" role="progressbar" style="width: {{ cl.fill_percentage }}%;"></div>
+          </div>
+          <div class="mt-2 d-flex justify-content-between align-items-center small">
+            {% if cl.available_slots > 0 %}
+              <span class="badge bg-success text-white px-2 py-1"><i class="fas fa-check-circle me-1"></i>{{ cl.available_slots }} seats available</span>
+            {% else %}
+              <span class="badge bg-danger text-white px-2 py-1"><i class="fas fa-ban me-1"></i>Class full</span>
+            {% endif %}
+            <span class="text-white small">Filled: {{ cl.fill_percentage }}%</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="zone-card-header bg-dark border-top py-2 px-3 d-flex justify-content-between align-items-center">
+        <a href="{{ url_for('class_detail', class_id=cl.id) }}" class="btn btn-sm btn-zone-outline">
+          <i class="fas fa-users me-1"></i> Student Roster ({{ cl.current_students }})
+        </a>
+        {% if current_user.role == 'admin' %}
+        <div class="btn-group btn-group-sm">
+          <a href="{{ url_for('class_edit', class_id=cl.id) }}" class="btn btn-zone-secondary" title="Edit Class">
+            <i class="fas fa-edit text-warning"></i>
+          </a>
+          <button type="button" class="btn btn-zone-danger" onclick="confirmDeleteClass('{{ cl.id }}', '{{ cl.name }}')" title="Delete Class">
+            <i class="fas fa-trash-alt"></i>
+          </button>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <div class="col-12">
+    <div class="zone-card p-5 text-center text-white">
+      <i class="fas fa-search fa-3x mb-3 text-warning d-block"></i>
+      <h5>No classes matched your filter criteria!</h5>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Modal Delete Class -->
+<div class="modal fade" id="deleteClassModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-dark text-white border-danger">
+      <div class="modal-header border-danger">
+        <h5 class="modal-title text-danger"><i class="fas fa-exclamation-triangle me-2"></i> Confirm Class Deletion</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-white">
+        Are you sure you want to delete class <strong id="deleteClassName" class="text-gold"></strong> (<span id="deleteClassId"></span>)?
+        <div class="alert alert-danger mt-3 mb-0 small">
+          <i class="fas fa-info-circle me-1"></i> <strong>Warning:</strong> The student roster and tuition records tied to this class will also be removed!
+        </div>
+      </div>
+      <div class="modal-footer border-secondary">
+        <button type="button" class="btn btn-zone-secondary" data-bs-dismiss="modal">Cancel</button>
+        <form id="deleteClassForm" method="POST" action="">
+          <button type="submit" class="btn btn-danger fw-bold">Confirm Delete</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function confirmDeleteClass(id, name) {
+    document.getElementById('deleteClassName').innerText = name;
+    document.getElementById('deleteClassId').innerText = id;
+    document.getElementById('deleteClassForm').action = "/classes/" + id + "/delete";
+    const modal = new bootstrap.Modal(document.getElementById('deleteClassModal'));
+    modal.show();
+  }
+</script>
+{% endblock %}

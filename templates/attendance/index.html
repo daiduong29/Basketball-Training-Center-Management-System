@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}Attendance & Practice Tracking - ZONE SPORT CENTER{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+  <div>
+    <h2 class="text-white fw-bold mb-1">
+      <i class="fas fa-clipboard-check text-gold me-2"></i> ATTENDANCE & PRACTICE TRACKING
+    </h2>
+    <p class="text-white fs-6 mb-0">Track attendance, punctuality, and participation for basketball practice sessions</p>
+  </div>
+</div>
+
+<!-- Class and Date Selector -->
+<div class="zone-card mb-4 p-3 border-2">
+  <form method="GET" action="{{ url_for('attendance_view') }}" class="row g-2 align-items-center">
+    <div class="col-md-6">
+      <label class="form-label text-white fw-bold">Select Basketball Class:</label>
+      <select name="class_id" class="form-select form-select-lg bg-dark text-white border-secondary" onchange="this.form.submit()">
+        {% for cl in classes %}
+        <option value="{{ cl.id }}" {% if selected_class and selected_class.id == cl.id %}selected{% endif %}>
+          {{ cl.name }} ({{ cl.id }}) &bull; Coach: {{ cl.coach_name }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label text-white fw-bold">Practice Date:</label>
+      <input type="date" name="date" class="form-control form-control-lg bg-dark text-white border-secondary" value="{{ selected_date }}" onchange="this.form.submit()">
+    </div>
+    <div class="col-md-2 d-flex align-items-end mt-3 mt-md-0">
+      <button type="submit" class="btn btn-zone-outline w-100 py-2">
+        <i class="fas fa-sync-alt me-1"></i> Reload
+      </button>
+    </div>
+  </form>
+</div>
+
+{% if selected_class %}
+<!-- Attendance Form -->
+<form method="POST" action="{{ url_for('attendance_view') }}">
+  <input type="hidden" name="class_id" value="{{ selected_class.id }}">
+  <input type="hidden" name="date" value="{{ selected_date }}">
+
+  <div class="zone-card mb-4 border-2">
+    <div class="zone-card-header d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2">
+      <div>
+        <h5 class="mb-0 text-white fw-bold">
+          <i class="fas fa-basketball-ball text-orange me-2"></i> {{ selected_class.name }}
+        </h5>
+        <div class="text-white small mt-1">
+          Date: <strong class="text-gold fs-6">{{ selected_date }}</strong> &bull; Coach: <strong class="text-white fs-6">{{ selected_class.coach_name }}</strong>
+        </div>
+      </div>
+      <div class="d-flex gap-2">
+        <button type="button" class="btn btn-sm btn-zone-secondary" onclick="markAll('Present')">
+          <i class="fas fa-check-double text-success me-1"></i> Mark All Present
+        </button>
+        <button type="submit" class="btn btn-sm btn-zone-primary">
+          <i class="fas fa-save me-1"></i> Save Attendance
+        </button>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-zone align-middle">
+        <thead>
+          <tr>
+            <th style="width: 70px;">#</th>
+            <th>Student ID</th>
+            <th>Student Name</th>
+            <th>Phone</th>
+            <th>Attendance Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in students_in_class %}
+          <tr>
+            <td class="text-white fw-bold">{{ loop.index }}</td>
+            <td><span class="badge-id">{{ s.id }}</span></td>
+            <td class="fw-bold fs-6">
+              <a href="{{ url_for('student_detail', student_id=s.id) }}" class="text-gold text-decoration-none hover-underline">
+                {{ s.name }}
+              </a>
+            </td>
+            <td><a href="tel:{{ s.phone }}" class="text-gold fw-bold text-decoration-none">{{ s.phone }}</a></td>
+            <td>
+              <div class="btn-group" role="group">
+                <input type="radio" class="btn-check" name="status_{{ s.id }}" id="present_{{ s.id }}" value="Present" {% if s.attendance_status in ['Present', 'Có mặt'] or not s.attendance_status %}checked{% endif %}>
+                <label class="btn btn-outline-success fw-bold px-3 py-2" for="present_{{ s.id }}">
+                  <i class="fas fa-check me-1"></i> Present
+                </label>
+
+                <input type="radio" class="btn-check" name="status_{{ s.id }}" id="excused_{{ s.id }}" value="Excused" {% if s.attendance_status in ['Excused', 'Vắng có phép'] %}checked{% endif %}>
+                <label class="btn btn-outline-warning fw-bold px-3 py-2" for="excused_{{ s.id }}">
+                  <i class="fas fa-file-medical me-1"></i> Excused
+                </label>
+
+                <input type="radio" class="btn-check" name="status_{{ s.id }}" id="absent_{{ s.id }}" value="Absent" {% if s.attendance_status in ['Absent', 'Vắng không phép'] %}checked{% endif %}>
+                <label class="btn btn-outline-danger fw-bold px-3 py-2" for="absent_{{ s.id }}">
+                  <i class="fas fa-times me-1"></i> Absent
+                </label>
+              </div>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="5" class="text-center py-5 text-white">
+              <i class="fas fa-users-slash fa-3x mb-3 text-warning d-block"></i>
+              <h5 class="text-white">No students enrolled in this class yet!</h5>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if students_in_class %}
+    <div class="zone-card-header bg-dark border-top d-flex justify-content-end p-3">
+      <button type="submit" class="btn btn-zone-primary py-2 px-4">
+        <i class="fas fa-save me-1"></i> SAVE ATTENDANCE SHEET
+      </button>
+    </div>
+    {% endif %}
+  </div>
+</form>
+{% else %}
+<div class="zone-card p-5 text-center text-white border-2">
+  <i class="fas fa-basketball-ball fa-3x mb-3 text-warning d-block"></i>
+  <h5>Please select a basketball class to start tracking attendance.</h5>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function markAll(status) {
+    if (status === 'Present') {
+      document.querySelectorAll("input[type=radio][value='Present']").forEach(r => r.checked = true);
+    }
+  }
+</script>
+{% endblock %}

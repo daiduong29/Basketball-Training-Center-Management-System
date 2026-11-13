@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+
+{% block title %}Class Details - {{ cl.name }} - ZONE SPORT CENTER{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+  <div class="d-flex align-items-center gap-3">
+    <a href="{{ url_for('class_list') }}" class="btn btn-zone-secondary btn-sm" title="Back to Classes">
+      <i class="fas fa-arrow-left fa-lg"></i>
+    </a>
+    <div>
+      <div class="d-flex align-items-center gap-2 mb-1">
+        <span class="badge-id">{{ cl.id }}</span>
+        <span class="badge-level {{ cl.level }}">{{ cl.level }}</span>
+        <span class="badge bg-success text-white fw-bold px-3 py-1">{{ cl.status }}</span>
+      </div>
+      <h2 class="text-white fw-bold mb-0">
+        CLASS: <span class="text-gold">{{ cl.name }}</span>
+      </h2>
+    </div>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{{ url_for('attendance_view', class_id=cl.id) }}" class="btn btn-zone-outline">
+      <i class="fas fa-clipboard-check me-1"></i> ATTENDANCE
+    </a>
+    {% if current_user.role == 'admin' %}
+      {% if cl.available_slots > 0 %}
+      <a href="{{ url_for('enrollment_register', class_id=cl.id) }}" class="btn btn-zone-primary">
+        <i class="fas fa-user-plus me-1"></i> ENROLL STUDENT
+      </a>
+      {% else %}
+      <button class="btn btn-secondary fw-bold" disabled>
+        <i class="fas fa-ban me-1"></i> CLASS FULL
+      </button>
+      {% endif %}
+      <a href="{{ url_for('class_edit', class_id=cl.id) }}" class="btn btn-zone-secondary">
+        <i class="fas fa-edit me-1"></i> EDIT CLASS
+      </a>
+    {% endif %}
+  </div>
+</div>
+
+<div class="row g-4 mb-4">
+  <!-- Class Info Box -->
+  <div class="col-lg-4">
+    <div class="zone-card mb-4 border-2">
+      <div class="zone-card-header">
+        <h5 class="mb-0 text-white fw-bold"><i class="fas fa-info-circle text-gold me-2"></i> CLASS OVERVIEW</h5>
+      </div>
+      <div class="zone-card-body">
+        <div class="mb-3 d-flex justify-content-between align-items-center border-bottom border-secondary pb-2">
+          <span class="text-white"><i class="fas fa-user-shield text-gold me-2"></i>Head Coach:</span>
+          <span class="text-gold fw-bold fs-6">
+            {% if cl.coach %}
+              <a href="{{ url_for('coach_detail', coach_id=cl.coach.id) }}" class="text-gold text-decoration-none hover-underline">
+                {{ cl.coach.name }}
+              </a>
+            {% else %}
+              <span class="text-white">Unassigned</span>
+            {% endif %}
+          </span>
+        </div>
+
+        <div class="mb-3 d-flex justify-content-between align-items-center border-bottom border-secondary pb-2">
+          <span class="text-white"><i class="fas fa-clock text-gold me-2"></i>Schedule:</span>
+          <span class="text-white fw-bold">{{ cl.schedule }}</span>
+        </div>
+
+        <div class="mb-3 d-flex justify-content-between align-items-center border-bottom border-secondary pb-2">
+          <span class="text-white"><i class="fas fa-map-marker-alt text-gold me-2"></i>Venue / Court:</span>
+          <span class="text-white fw-bold">{{ cl.location }}</span>
+        </div>
+
+        <div class="mb-3 d-flex justify-content-between align-items-center border-bottom border-secondary pb-2">
+          <span class="text-white"><i class="fas fa-money-bill-wave text-gold me-2"></i>Tuition Fee:</span>
+          <span class="text-gold fw-bold fs-4">${{ "{:,.0f}".format(cl.tuition_fee) if cl.tuition_fee < 10000 else "{:,.0f} đ".format(cl.tuition_fee) }}</span>
+        </div>
+
+        <!-- Capacity Box -->
+        <div class="p-3 bg-dark rounded border border-warning mb-3">
+          <div class="d-flex justify-content-between text-white fw-bold mb-1">
+            <span><i class="fas fa-users text-gold me-1"></i> Current Roster:</span>
+            <span class="text-gold fs-5">{{ cl.current_students }} / {{ cl.max_students }} Students</span>
+          </div>
+          <div class="progress progress-zone mb-2">
+            <div class="progress-bar {% if cl.current_students >= cl.max_students %}bg-danger{% else %}progress-bar-zone{% endif %}" role="progressbar" style="width: {{ cl.fill_percentage }}%;"></div>
+          </div>
+          <div class="d-flex justify-content-between text-white small fw-bold">
+            <span>Capacity Fill: {{ cl.fill_percentage }}%</span>
+            <span>Available Seats: <strong class="text-success fs-6">{{ cl.available_slots }}</strong></span>
+          </div>
+        </div>
+
+        {% if cl.description %}
+        <div class="p-3 bg-dark rounded border border-secondary small">
+          <strong class="text-gold d-block mb-1 fs-6"><i class="fas fa-bullseye me-1"></i> Course Syllabus & Goals:</strong>
+          <span class="text-white">{{ cl.description }}</span>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Students Enrolled in this Class -->
+  <div class="col-lg-8">
+    <div class="zone-card border-2">
+      <div class="zone-card-header d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-2">
+          <h5 class="mb-0 text-white fw-bold">
+            <i class="fas fa-users text-gold me-2"></i> CLASS STUDENT ROSTER
+          </h5>
+          <span class="badge bg-warning text-dark fw-bold fs-6">{{ cl.students|length }} Students</span>
+        </div>
+        {% if current_user.role == 'admin' and cl.available_slots > 0 %}
+        <a href="{{ url_for('enrollment_register', class_id=cl.id) }}" class="btn btn-sm btn-zone-primary">
+          <i class="fas fa-plus me-1"></i> Enroll Student
+        </a>
+        {% endif %}
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-zone align-middle">
+          <thead>
+            <tr>
+              <th>Student ID</th>
+              <th>Student Name</th>
+              <th>Age / Gender</th>
+              <th>Phone</th>
+              <th>Enroll Date</th>
+              <th>Payment Status</th>
+              {% if current_user.role == 'admin' %}
+              <th class="text-center">Action</th>
+              {% endif %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for s in cl.students %}
+            <tr>
+              <td><span class="badge-id">{{ s.id }}</span></td>
+              <td class="fw-bold fs-6">
+                <a href="{{ url_for('student_detail', student_id=s.id) }}" class="text-gold text-decoration-none hover-underline">
+                  {{ s.name }}
+                </a>
+              </td>
+              <td class="text-white">
+                <strong>{{ s.age or '--' }} yrs</strong> &bull;
+                <span>{{ s.gender }}</span>
+              </td>
+              <td>
+                <a href="tel:{{ s.phone }}" class="text-gold fw-bold text-decoration-none">
+                  {{ s.phone }}
+                </a>
+              </td>
+              <td><span class="text-white fw-bold">{{ s.enroll_date }}</span></td>
+              <td>
+                {% if s.payment_status in ['Đã thanh toán', 'Paid'] %}
+                  <span class="badge-status badge-paid"><i class="fas fa-check-circle me-1"></i> Paid</span>
+                {% else %}
+                  <span class="badge-status badge-unpaid"><i class="fas fa-clock me-1"></i> Unpaid</span>
+                {% endif %}
+              </td>
+              {% if current_user.role == 'admin' %}
+              <td class="text-center">
+                <button type="button" class="btn btn-sm btn-zone-danger py-1 px-2" onclick="confirmCancelEnrollment('{{ s.enrollment_id }}', '{{ s.name }}')" title="Cancel Enrollment">
+                  <i class="fas fa-user-minus"></i>
+                </button>
+              </td>
+              {% endif %}
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="7" class="text-center py-5 text-white">
+                <i class="fas fa-basketball-ball fa-3x mb-3 text-warning d-block"></i>
+                <h5 class="text-white">No students currently enrolled in this class!</h5>
+                {% if current_user.role == 'admin' %}
+                <div class="mt-3">
+                  <a href="{{ url_for('enrollment_register', class_id=cl.id) }}" class="btn btn-zone-primary">
+                    <i class="fas fa-user-plus me-1"></i> Enroll First Student
+                  </a>
+                </div>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Cancel Enrollment -->
+<div class="modal fade" id="cancelEnrollModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-dark text-white border-danger">
+      <div class="modal-header border-danger">
+        <h5 class="modal-title text-danger"><i class="fas fa-user-times me-2"></i> Cancel Student Enrollment</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-white">
+        Are you sure you want to remove student <strong id="cancelStudentName" class="text-gold"></strong> from this class?
+      </div>
+      <div class="modal-footer border-secondary">
+        <button type="button" class="btn btn-zone-secondary" data-bs-dismiss="modal">Close</button>
+        <form id="cancelEnrollForm" method="POST" action="">
+          <button type="submit" class="btn btn-danger fw-bold">Confirm Cancel</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function confirmCancelEnrollment(enrollId, studentName) {
+    document.getElementById('cancelStudentName').innerText = studentName;
+    document.getElementById('cancelEnrollForm').action = "/enrollments/" + enrollId + "/cancel?redirect_back=class&class_id={{ cl.id }}";
+    const modal = new bootstrap.Modal(document.getElementById('cancelEnrollModal'));
+    modal.show();
+  }
+</script>
+{% endblock %}

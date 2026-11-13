@@ -1,0 +1,423 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - ZONE SPORT CENTER{% endblock %}
+
+{% block content %}
+<!-- Welcome Banner -->
+<div class="court-banner p-4 p-lg-5 mb-4 position-relative">
+  <div class="row align-items-center position-relative" style="z-index: 2;">
+    <div class="col-lg-8">
+      <div class="d-flex align-items-center gap-2 mb-3">
+        <span class="badge bg-warning text-dark fw-bolder px-3 py-1 fs-6">
+          <i class="fas fa-basketball-ball fa-spin me-1" style="--fa-animation-duration: 6s;"></i> ZONE BASKETBALL ARENA
+        </span>
+        <span class="text-white fw-bold small"><i class="fas fa-signal text-success me-1"></i> ACTIVE 24/7</span>
+      </div>
+      <h1 class="display-6 text-white fw-bold mb-2">
+        Basketball Training <span class="text-gold">Command Center</span>
+      </h1>
+      <p class="text-white fs-5 mb-0" style="max-width: 680px; text-shadow: 0 2px 4px rgba(0,0,0,0.8);">
+        Welcome back, <strong class="text-gold text-decoration-underline">{{ current_user.full_name }}</strong>! 
+        Manage students, training camps, schedules, and player development performance.
+      </p>
+    </div>
+    <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
+      {% if current_user.role == 'admin' %}
+      <div class="d-flex flex-column flex-sm-row flex-lg-column gap-2 justify-content-lg-end">
+        <a href="{{ url_for('student_new') }}" class="btn btn-zone-primary py-2 px-3 fs-6">
+          <i class="fas fa-user-plus fa-lg"></i> REGISTER NEW STUDENT
+        </a>
+        <a href="{{ url_for('class_new') }}" class="btn btn-zone-outline py-2 px-3 fs-6">
+          <i class="fas fa-plus-circle fa-lg"></i> CREATE NEW CLASS
+        </a>
+      </div>
+      {% else %}
+      <div class="p-3 bg-dark rounded border border-warning text-start">
+        <div class="text-gold fw-bold mb-1"><i class="fas fa-whistle me-1"></i> COACHING ASSIGNMENT:</div>
+        <div class="text-white small">Review today's class schedule and complete attendance tracking for your assigned training camps.</div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- 4 Top Stat Cards -->
+<div class="row g-3 mb-4">
+  <div class="col-xl-3 col-sm-6">
+    <div class="stat-card">
+      <div>
+        <div class="stat-label text-white">TOTAL STUDENTS</div>
+        <div class="stat-value text-gold">{{ stats.total_students }}</div>
+        <div class="mt-2 text-white fw-bold small">
+          <i class="fas fa-check-circle text-success me-1"></i> Active in training
+        </div>
+      </div>
+      <div class="stat-icon">
+        <i class="fas fa-running"></i>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-3 col-sm-6">
+    <div class="stat-card stat-orange">
+      <div>
+        <div class="stat-label text-white">TOTAL COACHES</div>
+        <div class="stat-value text-orange">{{ stats.total_coaches }}</div>
+        <div class="mt-2 text-white fw-bold small">
+          <i class="fas fa-award text-warning me-1"></i> FIBA / VBA Certified
+        </div>
+      </div>
+      <div class="stat-icon text-orange">
+        <i class="fas fa-user-shield"></i>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-3 col-sm-6">
+    <div class="stat-card stat-green">
+      <div>
+        <div class="stat-label text-white">TRAINING CLASSES</div>
+        <div class="stat-value text-white">{{ stats.total_classes }}</div>
+        <div class="mt-2 text-white fw-bold small">
+          <i class="fas fa-basketball-ball text-warning me-1"></i> {{ stats.active_classes }} active camps
+        </div>
+      </div>
+      <div class="stat-icon text-success">
+        <i class="fas fa-basketball-ball"></i>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-3 col-sm-6">
+    <div class="stat-card stat-blue">
+      <div>
+        <div class="stat-label text-white">TOTAL ENROLLMENTS</div>
+        <div class="stat-value text-white">{{ stats.total_enrollments }}</div>
+        <div class="mt-2 text-white fw-bold small">
+          <i class="fas fa-clipboard-check text-info me-1"></i> Attendance: <strong class="text-gold">{{ stats.attendance_rate }}%</strong>
+        </div>
+      </div>
+      <div class="stat-icon text-info">
+        <i class="fas fa-users"></i>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% if current_user.role == 'admin' %}
+<!-- Financial Summary Ticker Banner -->
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="zone-card p-3 border-success" style="background: linear-gradient(135deg, #13241d 0%, #151b24 100%);">
+      <div class="d-flex align-items-center justify-content-between">
+        <div>
+          <div class="text-white fw-bold small text-uppercase"><i class="fas fa-wallet text-success me-1"></i> Total Tuition Collected</div>
+          <div class="fs-3 fw-bold text-success mt-1">{{ "{:,.0f}".format(stats.total_collected) }} đ</div>
+          <div class="text-white small">Deposited to Center Fund</div>
+        </div>
+        <div class="fs-1 text-success opacity-75">
+          <i class="fas fa-circle-check"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="zone-card p-3 border-danger" style="background: linear-gradient(135deg, #2b1618 0%, #151b24 100%);">
+      <div class="d-flex align-items-center justify-content-between">
+        <div>
+          <div class="text-white fw-bold small text-uppercase"><i class="fas fa-receipt text-danger me-1"></i> Outstanding Balance</div>
+          <div class="fs-3 fw-bold text-danger mt-1">{{ "{:,.0f}".format(stats.total_debt) }} đ</div>
+          <div class="text-white small">Pending tuition payment</div>
+        </div>
+        <div class="fs-1 text-danger opacity-75">
+          <i class="fas fa-clock"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="zone-card p-3 border-warning" style="background: linear-gradient(135deg, #261f10 0%, #151b24 100%);">
+      <div class="d-flex align-items-center justify-content-between">
+        <div>
+          <div class="text-white fw-bold small text-uppercase"><i class="fas fa-fire text-warning me-1"></i> Overall Attendance Rate</div>
+          <div class="fs-3 fw-bold text-gold mt-1">{{ stats.attendance_rate }}%</div>
+          <div class="text-white small">Consistent training participation</div>
+        </div>
+        <div class="fs-1 text-gold opacity-75">
+          <i class="fas fa-chart-line"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- Charts Section -->
+<div class="row g-4 mb-4">
+  <!-- Sĩ số học viên theo lớp -->
+  <div class="col-lg-8">
+    <div class="zone-card h-100">
+      <div class="zone-card-header">
+        <h5 class="mb-0 text-white fw-bold">
+          <i class="fas fa-chart-bar text-gold me-2"></i> STUDENT ENROLLMENT BY CLASS
+        </h5>
+        <span class="badge bg-warning text-dark fw-bold">Live Data</span>
+      </div>
+      <div class="zone-card-body">
+        <div style="height: 310px; position: relative;">
+          <canvas id="classEnrollmentChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phân bố cấp độ lớp học -->
+  <div class="col-lg-4">
+    <div class="zone-card h-100">
+      <div class="zone-card-header">
+        <h5 class="mb-0 text-white fw-bold">
+          <i class="fas fa-chart-pie text-orange me-2"></i> LEVEL DISTRIBUTION
+        </h5>
+      </div>
+      <div class="zone-card-body d-flex flex-column justify-content-center align-items-center">
+        <div style="height: 210px; width: 210px; position: relative;">
+          <canvas id="levelDistributionChart"></canvas>
+        </div>
+        <div class="mt-3 w-100">
+          <div class="d-flex justify-content-between text-white border-bottom border-secondary py-2">
+            <span><i class="fas fa-square text-success me-2"></i> <strong>Beginner</strong> (Fundamentals)</span>
+            <span class="fw-bold text-success fs-6" id="lvl-beginner-cnt">0</span>
+          </div>
+          <div class="d-flex justify-content-between text-white border-bottom border-secondary py-2">
+            <span><i class="fas fa-square text-warning me-2"></i> <strong>Intermediate</strong> (Development)</span>
+            <span class="fw-bold text-warning fs-6" id="lvl-intermediate-cnt">0</span>
+          </div>
+          <div class="d-flex justify-content-between text-white py-2">
+            <span><i class="fas fa-square text-danger me-2"></i> <strong>Advanced</strong> (Competitive)</span>
+            <span class="fw-bold text-danger fs-6" id="lvl-advanced-cnt">0</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Recent Students & Active Classes List -->
+<div class="row g-4">
+  <!-- Danh sách học viên mới -->
+  <div class="col-lg-6">
+    <div class="zone-card h-100">
+      <div class="zone-card-header">
+        <h5 class="mb-0 text-white fw-bold">
+          <i class="fas fa-user-graduate text-gold me-2"></i> RECENTLY JOINED STUDENTS
+        </h5>
+        <a href="{{ url_for('student_list') }}" class="btn btn-sm btn-zone-outline">View All</a>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-zone align-middle">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Full Name</th>
+              <th>Gender</th>
+              <th>Phone</th>
+              <th>Join Date</th>
+              <th class="text-center">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for s in stats.recent_students %}
+            <tr>
+              <td><span class="badge-id">{{ s.id }}</span></td>
+              <td class="fw-bold">
+                <a href="{{ url_for('student_detail', student_id=s.id) }}" class="text-gold text-decoration-none hover-gold">
+                  {{ s.name }}
+                </a>
+              </td>
+              <td><span class="text-white">{{ s.gender }}</span></td>
+              <td><span class="text-white fw-bold">{{ s.phone }}</span></td>
+              <td><span class="text-white small">{{ s.created_date }}</span></td>
+              <td class="text-center">
+                <a href="{{ url_for('student_detail', student_id=s.id) }}" class="btn btn-sm btn-zone-outline py-0 px-2" title="View Profile">
+                  <i class="fas fa-eye"></i>
+                </a>
+              </td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="6" class="text-center py-4 text-white">No students registered yet</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tình trạng sĩ số lớp học -->
+  <div class="col-lg-6">
+    <div class="zone-card h-100">
+      <div class="zone-card-header">
+        <h5 class="mb-0 text-white fw-bold">
+          <i class="fas fa-basketball-ball text-orange me-2"></i> CLASS CAPACITY STATUS
+        </h5>
+        <a href="{{ url_for('class_list') }}" class="btn btn-sm btn-zone-outline">View All</a>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-zone align-middle">
+          <thead>
+            <tr>
+              <th>Class Name</th>
+              <th>Level</th>
+              <th>Roster</th>
+              <th>Capacity</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for cl in stats.class_stats %}
+            <tr>
+              <td class="fw-bold">
+                <a href="{{ url_for('class_detail', class_id=cl.id) }}" class="text-gold text-decoration-none hover-gold">
+                  {{ cl.name }}
+                </a>
+              </td>
+              <td>
+                <span class="badge-level {{ cl.level }}">{{ cl.level }}</span>
+              </td>
+              <td class="text-white fw-bold">
+                <span class="text-gold fs-6">{{ cl.count }}</span> / {{ cl.max }} Players
+              </td>
+              <td style="min-width: 130px;">
+                <div class="progress progress-zone mb-1">
+                  <div class="progress-bar progress-bar-zone" role="progressbar" style="width: {{ cl.fill }}%;"></div>
+                </div>
+                <div class="text-white fw-bold" style="font-size: 0.8rem;">{{ cl.fill }}% full</div>
+              </td>
+              <td>
+                {% if cl.count >= cl.max %}
+                  <span class="badge bg-danger fs-7">Full</span>
+                {% else %}
+                  <span class="badge bg-success fs-7">Available</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="5" class="text-center py-4 text-white">No classes available</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Chart.js data
+  const classData = {{ stats.class_stats | tojson }};
+  const labels = classData.map(c => c.name.length > 18 ? c.name.substring(0, 18) + '...' : c.name);
+  const counts = classData.map(c => c.count);
+  const maxes = classData.map(c => c.max);
+
+  // Bar Chart
+  const ctxBar = document.getElementById('classEnrollmentChart').getContext('2d');
+  new Chart(ctxBar, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Enrolled Students',
+          data: counts,
+          backgroundColor: '#ffc107',
+          borderColor: '#ffd54f',
+          borderWidth: 2,
+          borderRadius: 6
+        },
+        {
+          label: 'Max Capacity',
+          data: maxes,
+          backgroundColor: 'rgba(255, 94, 0, 0.25)',
+          borderColor: '#ff5e00',
+          borderWidth: 2,
+          borderRadius: 6
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          labels: { color: '#ffffff', font: { family: 'Be Vietnam Pro', size: 12, weight: 'bold' } }
+        },
+        tooltip: {
+          backgroundColor: '#0d1017',
+          titleColor: '#ffc107',
+          bodyColor: '#ffffff',
+          borderColor: '#ffc107',
+          borderWidth: 1.5
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: '#ffffff', font: { family: 'Be Vietnam Pro', size: 11, weight: '600' } },
+          grid: { color: 'rgba(255, 255, 255, 0.08)' }
+        },
+        y: {
+          beginAtZero: true,
+          ticks: { color: '#ffffff', font: { family: 'Be Vietnam Pro', weight: '600' }, stepSize: 2 },
+          grid: { color: 'rgba(255, 255, 255, 0.08)' }
+        }
+      }
+    }
+  });
+
+  // Level counts for Doughnut chart
+  let beginner = 0, intermediate = 0, advanced = 0;
+  classData.forEach(c => {
+    if (c.level === 'Beginner') beginner += c.count;
+    else if (c.level === 'Intermediate') intermediate += c.count;
+    else if (c.level === 'Advanced') advanced += c.count;
+  });
+
+  document.getElementById('lvl-beginner-cnt').innerText = beginner + ' Students';
+  document.getElementById('lvl-intermediate-cnt').innerText = intermediate + ' Students';
+  document.getElementById('lvl-advanced-cnt').innerText = advanced + ' Students';
+
+  const ctxPie = document.getElementById('levelDistributionChart').getContext('2d');
+  new Chart(ctxPie, {
+    type: 'doughnut',
+    data: {
+      labels: ['Beginner', 'Intermediate', 'Advanced'],
+      datasets: [{
+        data: [beginner || 1, intermediate || 1, advanced || 1],
+        backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+        borderWidth: 3,
+        borderColor: '#161b24'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#0d1017',
+          titleColor: '#ffffff',
+          bodyColor: '#ffc107',
+          borderColor: '#ffc107',
+          borderWidth: 1.5
+        }
+      },
+      cutout: '70%'
+    }
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Edit Student' if is_edit else 'Register New Student' }} - ZONE SPORT CENTER{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="zone-card border-2">
+      <div class="zone-card-header">
+        <h4 class="mb-0 text-white fw-bold">
+          <i class="fas {% if is_edit %}fa-user-edit text-warning{% else %}fa-user-plus text-gold{% endif %} me-2"></i>
+          {{ 'EDIT STUDENT INFORMATION' if is_edit else 'REGISTER NEW STUDENT' }}
+        </h4>
+        {% if is_edit %}
+          <span class="badge bg-warning text-dark fs-6 fw-bold">{{ student.id }}</span>
+        {% endif %}
+      </div>
+      <div class="zone-card-body">
+        <form method="POST" action="">
+          <div class="row g-3 mb-3">
+            {% if is_edit %}
+            <div class="col-md-4">
+              <label class="form-label text-white">Student ID</label>
+              <input type="text" class="form-control text-warning fw-bold bg-dark border-secondary" value="{{ student.id }}" readonly disabled>
+            </div>
+            <div class="col-md-8">
+            {% else %}
+            <div class="col-12">
+            {% endif %}
+              <label class="form-label text-white" for="name">Full Name <span class="text-danger">*</span></label>
+              <input type="text" class="form-control form-control-lg" id="name" name="name" placeholder="e.g. Michael Jordan" value="{{ student.name if is_edit else '' }}" required>
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label text-white" for="dob">Date of Birth <span class="text-danger">*</span></label>
+              <input type="date" class="form-control form-control-lg" id="dob" name="dob" value="{{ student.dob if is_edit else '2012-01-01' }}" required>
+              <div class="text-white small mt-1"><i class="fas fa-info-circle text-gold me-1"></i>Age will be automatically calculated from date of birth</div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label text-white" for="gender">Gender <span class="text-danger">*</span></label>
+              <select class="form-select form-select-lg" id="gender" name="gender" required>
+                <option value="Male" {% if is_edit and student.gender in ['Nam', 'Male'] %}selected{% endif %}>Male</option>
+                <option value="Female" {% if is_edit and student.gender in ['Nữ', 'Female'] %}selected{% endif %}>Female</option>
+                <option value="Other" {% if is_edit and student.gender in ['Khác', 'Other'] %}selected{% endif %}>Other</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label text-white" for="phone">Phone Number <span class="text-danger">*</span></label>
+              <input type="tel" class="form-control form-control-lg" id="phone" name="phone" placeholder="Parent or Student Phone Number" value="{{ student.phone if is_edit else '' }}" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label text-white" for="status">Training Status</label>
+              <select class="form-select form-select-lg" id="status" name="status">
+                <option value="Active" {% if is_edit and student.status in ['Đang học', 'Active'] %}selected{% endif %}>Active</option>
+                <option value="On Leave" {% if is_edit and student.status in ['Tạm nghỉ', 'On Leave'] %}selected{% endif %}>On Leave</option>
+                <option value="Graduated" {% if is_edit and student.status in ['Đã tốt nghiệp', 'Graduated'] %}selected{% endif %}>Graduated</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label text-white" for="address">Residential Address</label>
+            <input type="text" class="form-control" id="address" name="address" placeholder="e.g. 12 Vo Van Ngan, Thu Duc, HCMC" value="{{ student.address if is_edit else '' }}">
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label text-white" for="note">Athletic Notes & Scouting Report</label>
+            <textarea class="form-control" id="note" name="note" rows="3" placeholder="Primary position (Point Guard, Shooting Guard), height, athletic conditioning, strengths...">{{ student.note if is_edit else '' }}</textarea>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center border-top border-secondary pt-3">
+            <a href="{{ url_for('student_list') }}" class="btn btn-zone-secondary">
+              <i class="fas fa-arrow-left me-1"></i> Back to List
+            </a>
+            <button type="submit" class="btn btn-zone-primary py-2 px-4">
+              <i class="fas fa-save me-1"></i> {{ 'Save Changes' if is_edit else 'Save Student Profile' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

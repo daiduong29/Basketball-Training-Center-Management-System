@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block title %}Student Management - ZONE SPORT CENTER{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+  <div>
+    <h2 class="text-white fw-bold mb-1">
+      <i class="fas fa-running text-gold me-2"></i> STUDENT MANAGEMENT
+    </h2>
+    <p class="text-white fs-6 mb-0">Player rosters, athletic performance tracking, and training development profiles</p>
+  </div>
+  {% if current_user.role == 'admin' %}
+  <div>
+    <a href="{{ url_for('student_new') }}" class="btn btn-zone-primary">
+      <i class="fas fa-user-plus"></i> REGISTER NEW STUDENT
+    </a>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Search & Filter Card -->
+<div class="zone-card mb-4 p-3 border-2">
+  <form method="GET" action="{{ url_for('student_list') }}" class="row g-2 align-items-center">
+    <div class="col-md-9 col-lg-10">
+      <div class="input-group input-group-lg">
+        <span class="input-group-text bg-dark border-secondary text-gold">
+          <i class="fas fa-search fa-lg"></i>
+        </span>
+        <input type="text" name="q" class="form-control" placeholder="Search by student name, phone number, or ID (e.g., An, 0901, HV001)..." value="{{ query or '' }}">
+      </div>
+    </div>
+    <div class="col-md-3 col-lg-2 d-flex gap-2">
+      <button type="submit" class="btn btn-zone-primary w-100">
+        <i class="fas fa-filter"></i> FILTER
+      </button>
+      {% if query %}
+      <a href="{{ url_for('student_list') }}" class="btn btn-zone-secondary" title="Clear filter">
+        <i class="fas fa-times"></i>
+      </a>
+      {% endif %}
+    </div>
+  </form>
+</div>
+
+<!-- Students Table -->
+<div class="zone-card border-2">
+  <div class="zone-card-header d-flex justify-content-between align-items-center">
+    <div class="d-flex align-items-center gap-2">
+      <h5 class="mb-0 text-white fw-bold">
+        <i class="fas fa-basketball-ball text-orange me-2"></i> ALL REGISTERED STUDENTS
+      </h5>
+      <span class="badge bg-warning text-dark fw-bold fs-6">{{ students|length }} Students</span>
+    </div>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-zone align-middle">
+      <thead>
+        <tr>
+          <th>Student ID</th>
+          <th>Full Name</th>
+          <th>DOB / Age</th>
+          <th>Gender</th>
+          <th>Phone</th>
+          <th>Address</th>
+          <th>Classes</th>
+          <th class="text-center">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in students %}
+        <tr>
+          <td><span class="badge-id">{{ s.id }}</span></td>
+          <td class="fw-bold fs-6">
+            <a href="{{ url_for('student_detail', student_id=s.id) }}" class="text-gold text-decoration-none hover-underline">
+              {{ s.name }}
+            </a>
+          </td>
+          <td class="text-white">
+            <strong>{{ s.dob or '---' }}</strong>
+            {% if s.age is not none %}
+              <span class="badge bg-warning text-dark fw-bold ms-1">{{ s.age }} yrs</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if s.gender in ['Nam', 'Male'] %}
+              <span class="badge bg-primary text-white fw-bold px-2 py-1"><i class="fas fa-mars me-1"></i> Male</span>
+            {% elif s.gender in ['Nữ', 'Female'] %}
+              <span class="badge bg-danger text-white fw-bold px-2 py-1"><i class="fas fa-venus me-1"></i> Female</span>
+            {% else %}
+              <span class="badge bg-secondary text-white">{{ s.gender }}</span>
+            {% endif %}
+          </td>
+          <td>
+            <a href="tel:{{ s.phone }}" class="text-white fw-bold text-decoration-none fs-6">
+              <i class="fas fa-phone-alt fa-xs me-1 text-gold"></i> {{ s.phone }}
+            </a>
+          </td>
+          <td class="text-white" style="max-width: 200px;" title="{{ s.address }}">
+            {{ s.address or 'N/A' }}
+          </td>
+          <td>
+            <span class="badge bg-dark border border-warning text-gold fw-bold fs-6">
+              {{ s.enrolled_count }} Classes
+            </span>
+          </td>
+          <td class="text-center">
+            <div class="btn-group btn-group-sm">
+              <a href="{{ url_for('student_detail', student_id=s.id) }}" class="btn btn-zone-outline" title="View Profile">
+                <i class="fas fa-eye"></i> View
+              </a>
+              {% if current_user.role == 'admin' %}
+              <a href="{{ url_for('student_edit', student_id=s.id) }}" class="btn btn-zone-secondary" title="Edit">
+                <i class="fas fa-edit text-warning"></i>
+              </a>
+              <button type="button" class="btn btn-zone-danger" onclick="confirmDeleteStudent('{{ s.id }}', '{{ s.name }}')" title="Delete Student">
+                <i class="fas fa-trash-alt"></i>
+              </button>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="8" class="text-center py-5 text-white">
+            <i class="fas fa-search fa-3x mb-3 text-warning d-block"></i>
+            <h5 class="text-white">No students matched your search query!</h5>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal Delete Student Confirmation -->
+<div class="modal fade" id="deleteStudentModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header border-danger">
+        <h5 class="modal-title text-danger"><i class="fas fa-exclamation-triangle me-2"></i> Confirm Student Deletion</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-white">
+        Are you sure you want to delete student <strong id="deleteStudentName" class="text-gold"></strong> (<span id="deleteStudentId"></span>)?
+        <div class="alert alert-danger mt-3 mb-0 small">
+          <i class="fas fa-info-circle me-1"></i> <strong>Warning:</strong> All class enrollments and tuition payment records for this student will be permanently removed!
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-zone-secondary" data-bs-dismiss="modal">Cancel</button>
+        <form id="deleteStudentForm" method="POST" action="">
+          <button type="submit" class="btn btn-danger fw-bold">Confirm Delete</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function confirmDeleteStudent(id, name) {
+    document.getElementById('deleteStudentName').innerText = name;
+    document.getElementById('deleteStudentId').innerText = id;
+    document.getElementById('deleteStudentForm').action = "/students/" + id + "/delete";
+    const modal = new bootstrap.Modal(document.getElementById('deleteStudentModal'));
+    modal.show();
+  }
+</script>
+{% endblock %}
